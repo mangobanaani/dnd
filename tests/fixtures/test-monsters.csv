@@ -1,0 +1,6 @@
+name,size,type,tag,alignment,movement,cr,sourceBook,sourcePage,spellUser,legendaryActions,lairActions,abilities,actions,reaction,arctic,coastal,desert,forest,grassland,hill,mountain,swamp,underdark,underwater,urban,other,,credits
+Goblin,Small,humanoid,goblinoid,neutral evil,,1/4,MM,166,,,,"Nimble Escape","Scimitar, Shortbow",,,,,,x,x,,,,,,,,Test Author
+Ancient Red Dragon,Gargantuan,dragon,,chaotic evil,Fly,24,MM,98,y,y,y,"Legendary Resistance","Bite, Claw, Tail, Frightful Presence, Fire Breath","Legendary Actions",,,x,,,x,x,,,,,,,Test Author
+Aboleth,Large,aberration,,lawful evil,Swim,10,MM,13,y,,,"Mucous Cloud, Probing Telepathy","Tentacle, Tail, Enslave","",,,,,,,,,x,x,,,,Test Author
+Beholder,Large,aberration,,lawful evil,Fly,13,MM,28,,y,y,"Antimagic Cone","Eye Rays, Bite","Legendary Actions",,,,,,,,x,,,,,,Test Author
+Commoner,Medium,humanoid,any race,any,,0,MM,345,,,,"","Club",,x,x,x,x,x,x,x,x,x,x,x,x,,Test Author

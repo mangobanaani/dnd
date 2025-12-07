@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+@theme {
+  /* Premium Dark Fantasy Theme */
+  --color-background: #0a0a0f;
+  --color-background-secondary: #0d0d12;
+  --color-foreground: #f5f5f5;
+  --color-foreground-secondary: #d4d4d8;
+
+  /* Glass morphism card backgrounds */
+  --color-card: #12121a;
+  --color-card-foreground: #f5f5f5;
+
+  --color-popover: #12121a;
+  --color-popover-foreground: #f5f5f5;
+
+  /* Primary: Premium purple for magical elements */
+  --color-primary: #9d6fff;
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary: Deep blue */
+  --color-secondary: #1e3a8a;
+  --color-secondary-foreground: #fafafa;
+
+  --color-muted: #1a1a1f;
+  --color-muted-foreground: #a1a1aa;
+
+  /* Accent: True gold for premium highlights */
+  --color-accent: #d4af37;
+  --color-accent-foreground: #0a0a0f;
+
+  /* Destructive: Red for damage/danger */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #fafafa;
+
+  /* Success: Green for healing/success */
+  --color-success: #10b981;
+  --color-success-foreground: #022c22;
+
+  /* Warning: Amber/orange */
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #fef3c7;
+
+  --color-border: #1a1a1f;
+  --color-input: #1a1a1f;
+  --color-ring: #9d6fff;
+
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+
+  /* Animation timing functions */
+  --ease-premium: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-entrance: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Base styles */
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Premium Glass Morphism System with Inner Shadow Depth */
+.glass {
+  background-color: rgb(from var(--color-card) r g b / 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgb(from var(--color-border) r g b / 0.5);
+}
+
+.glass-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(18, 18, 26, 0.7) 0%,
+    rgba(18, 18, 26, 0.5) 100%
+  );
+  backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(157, 111, 255, 0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card {
+  background: rgba(18, 18, 26, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(157, 111, 255, 0.1);
+  box-shadow:
+    inset 2px 2px 8px rgba(0, 0, 0, 0.6),
+    inset -2px -2px 8px rgba(255, 255, 255, 0.02),
+    0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.glass-strong {
+  background: rgba(13, 13, 18, 0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(157, 111, 255, 0.2);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+.glass-subtle {
+  background-color: rgb(from var(--color-card) r g b / 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgb(from var(--color-border) r g b / 0.3);
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-foreground);
+}
+
+/* Premium smooth transitions */
+* {
+  transition: color 350ms var(--ease-premium), background-color 350ms var(--ease-premium), border-color 350ms var(--ease-premium);
+}
+
+/* Toast animations */
+@keyframes slide-in {
+  from {
+    transform: translateX(calc(100% + 1rem));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(calc(100% + 1rem));
+    opacity: 0;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 300ms ease-out;
+}
+
+.animate-slide-out {
+  animation: slide-out 200ms ease-in;
+}
+
+/* Premium text shadow utilities for headings */
+.text-glow-gold {
+  text-shadow:
+    0 0 20px rgba(212, 175, 55, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.text-glow-purple {
+  text-shadow:
+    0 0 16px rgba(157, 111, 255, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.text-glow-purple-subtle {
+  text-shadow:
+    0 0 12px rgba(157, 111, 255, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Modal entrance animation */
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-enter {
+  animation: modal-enter 500ms var(--ease-entrance);
+}
+
+/* Shimmer loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(26, 26, 31, 0.8) 0%,
+    rgba(157, 111, 255, 0.1) 50%,
+    rgba(26, 26, 31, 0.8) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite ease-in-out;
+}

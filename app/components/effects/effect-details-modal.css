@@ -1,0 +1,153 @@
+/**
+ * EffectDetailsModal Styles
+ */
+
+.modal-content.effect-details {
+  max-width: 500px;
+}
+
+.effect-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.effect-icon-large {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.effect-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.effect-section:last-child {
+  border-bottom: none;
+}
+
+.effect-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.effect-section p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.effect-description {
+  font-size: 1rem !important;
+  color: #111827 !important;
+}
+
+.concentration-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #eff6ff;
+  border: 1px solid #3b82f6;
+  border-radius: 0.375rem;
+  color: #1e40af !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+}
+
+.mechanics-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mechanic-item {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.mechanic-item.bonus {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.mechanic-item.advantage {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.mechanic-item.disadvantage {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.mechanic-item.damage {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.mechanic-item.temp-hp {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #c084fc;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  ring: 2px;
+  ring-color: #3b82f64d;
+}
+
+.footer-right {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.button-danger {
+  padding: 0.5rem 1rem;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button-danger:hover {
+  background-color: #b91c1c;
+}

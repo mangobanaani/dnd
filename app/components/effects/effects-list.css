@@ -1,0 +1,47 @@
+/**
+ * EffectsList Styles
+ */
+
+.effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.effects-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.effects-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.effects-group-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  letter-spacing: 0.05em;
+}
+
+.effects-list-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.effects-list-empty p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-style: italic;
+}

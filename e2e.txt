@@ -1,0 +1,317 @@
+
+> dnd-campaign-manager@0.1.0 test:e2e
+> playwright test
+
+
+Running 388 tests using 5 workers
+
+[1A[2K[1/388] [node] › tests/campaign-character-join.spec.ts:7:9 › Campaign-Character Join Functionality › Adding Character to Campaign › should add character ID to campaign.characterIds array
+[1A[2K[2/388] [node] › tests/campaign-character-join.spec.ts:104:9 › Campaign-Character Join Functionality › Adding Character to Campaign › should add player ID when adding their character
+[1A[2K[3/388] [node] › tests/campaign-character-join.spec.ts:55:9 › Campaign-Character Join Functionality › Adding Character to Campaign › should not add duplicate character ID
+[1A[2K[4/388] [node] › tests/campaign-character-join.spec.ts:150:9 › Campaign-Character Join Functionality › Removing Character from Campaign › should remove character ID from campaign
+[1A[2K[5/388] [node] › tests/campaign-character-join.spec.ts:191:9 › Campaign-Character Join Functionality › Removing Character from Campaign › should handle removing non-existent character gracefully
+[1A[2K[6/388] [node] › tests/campaign-character-join.spec.ts:256:9 › Campaign-Character Join Functionality › Character Campaign Assignment › should clear campaignId when leaving campaign
+[1A[2K[7/388] [node] › tests/campaign-character-join.spec.ts:276:9 › Campaign-Character Join Functionality › Character Campaign Assignment › should handle character switching campaigns
+[1A[2K[8/388] [node] › tests/campaign-character-join.spec.ts:233:9 › Campaign-Character Join Functionality › Character Campaign Assignment › should set campaignId on character when joining
+[1A[2K[9/388] [node] › tests/campaign-character-join.spec.ts:302:9 › Campaign-Character Join Functionality › Bidirectional Consistency › adding character to campaign should maintain both sides
+[1A[2K[10/388] [node] › tests/campaign-character-join.spec.ts:366:9 › Campaign-Character Join Functionality › Bidirectional Consistency › removing character should update both sides
+[1A[2K[11/388] [node] › tests/campaign-character-join.spec.ts:426:9 › Campaign-Character Join Functionality › Validation Rules › should not allow adding character without playerId
+[1A[2K[12/388] [node] › tests/campaign-character-join.spec.ts:440:9 › Campaign-Character Join Functionality › Validation Rules › should not allow character to join multiple campaigns simultaneously
+[1A[2K[13/388] [node] › tests/campaign-character-join.spec.ts:461:9 › Campaign-Character Join Functionality › Validation Rules › should validate campaign status allows new characters
+[1A[2K[14/388] [node] › tests/campaign-character-join.spec.ts:526:9 › Campaign-Character Join Functionality › Edge Cases › should handle campaign with many characters
+[1A[2K[15/388] [node] › tests/campaign-character-join.spec.ts:553:9 › Campaign-Character Join Functionality › Edge Cases › should maintain referential integrity when character deleted
+[1A[2K[16/388] [node] › tests/campaign-character-join.spec.ts:499:9 › Campaign-Character Join Functionality › Edge Cases › should handle empty characterIds array
+[1A[2K[17/388] [node] › tests/campaign-features.spec.ts:13:7 › Campaign NPC Structure › should have valid NPC structure
+[1A[2K[18/388] [node] › tests/campaign-features.spec.ts:38:7 › Campaign NPC Structure › should support optional NPC fields
+[1A[2K[19/388] [node] › tests/campaign-features.spec.ts:58:7 › Campaign NPC Structure › should track NPC image URLs
+[1A[2K[20/388] [node] › tests/campaign-features.spec.ts:79:7 › NPC Relationships › should categorize NPCs as allies
+[1A[2K[21/388] [node] › tests/campaign-features.spec.ts:113:7 › NPC Relationships › should categorize NPCs as neutral
+[1A[2K[22/388] [node] › tests/campaign-features.spec.ts:96:7 › NPC Relationships › should categorize NPCs as enemies
+[1A[2K[23/388] [node] › tests/campaign-features.spec.ts:130:7 › NPC Relationships › should handle unknown relationships
+[1A[2K[24/388] [node] › tests/campaign-features.spec.ts:183:7 › NPC Status Tracking › should handle unknown status
+[1A[2K[25/388] [node] › tests/campaign-features.spec.ts:166:7 › NPC Status Tracking › should track deceased NPCs
+[1A[2K[26/388] [node] › tests/campaign-features.spec.ts:149:7 › NPC Status Tracking › should track living NPCs
+[1A[2K[27/388] [node] › tests/campaign-features.spec.ts:202:7 › NPC Privacy and Visibility › should support public NPCs visible to players
+[1A[2K[28/388] [node] › tests/campaign-features.spec.ts:219:7 › NPC Privacy and Visibility › should support private NPCs only DM can see
+[1A[2K[29/388] [node] › tests/campaign-features.spec.ts:238:7 › NPC Metadata and Timestamps › should track creation timestamp
+[1A[2K[30/388] [node] › tests/campaign-features.spec.ts:256:7 › NPC Metadata and Timestamps › should track update timestamp
+[1A[2K[31/388] [node] › tests/campaign-features.spec.ts:280:7 › Campaign Location Structure › should have valid location structure
+[1A[2K[32/388] [node] › tests/campaign-features.spec.ts:306:7 › Campaign Location Structure › should support all location types
+[1A[2K[33/388] [node] › tests/campaign-features.spec.ts:328:7 › Campaign Location Structure › should support optional location fields
+[1A[2K[34/388] [node] › tests/campaign-features.spec.ts:351:7 › Location Types › should create city locations
+[1A[2K[35/388] [node] › tests/campaign-features.spec.ts:371:7 › Location Types › should create dungeon locations
+[1A[2K[36/388] [node] › tests/campaign-features.spec.ts:389:7 › Location Types › should create wilderness locations
+[1A[2K[37/388] [node] › tests/campaign-features.spec.ts:409:7 › Location Features and Relationships › should track notable features
+[1A[2K[38/388] [node] › tests/campaign-features.spec.ts:434:7 › Location Features and Relationships › should link connected locations
+[1A[2K[39/388] [node] › tests/campaign-features.spec.ts:453:7 › Location Features and Relationships › should link NPCs to locations
+[1A[2K[40/388] [node] › tests/campaign-features.spec.ts:474:7 › Location Images and Maps › should support location images
+[1A[2K[41/388] [node] › tests/campaign-features.spec.ts:494:7 › Location Images and Maps › should support map URLs
+[1A[2K[42/388] [node] › tests/campaign-features.spec.ts:516:7 › Location Privacy › should support public locations
+[1A[2K[43/388] [node] › tests/campaign-features.spec.ts:534:7 › Location Privacy › should support private/hidden locations
+[1A[2K[44/388] [node] › tests/campaign-features.spec.ts:556:7 › Quest Objectives › should have valid objective structure
+[1A[2K[45/388] [node] › tests/campaign-features.spec.ts:570:7 › Quest Objectives › should track objective completion
+[1A[2K[46/388] [node] › tests/campaign-features.spec.ts:608:7 › Quest Objectives › should allow completing optional objectives
+[1A[2K[47/388] [node] › tests/campaign-features.spec.ts:589:7 › Quest Objectives › should distinguish optional vs required objectives
+[1A[2K[48/388] [node] › tests/campaign-features.spec.ts:622:7 › Quest Status and Priority › should track available quests
+[1A[2K[49/388] [node] › tests/campaign-features.spec.ts:641:7 › Quest Status and Priority › should track active quests
+[1A[2K[50/388] [node] › tests/campaign-features.spec.ts:660:7 › Quest Status and Priority › should track completed quests
+[1A[2K[51/388] [node] › tests/campaign-features.spec.ts:698:7 › Quest Status and Priority › should support all priority levels
+[1A[2K[52/388] [node] › tests/campaign-features.spec.ts:679:7 › Quest Status and Priority › should track failed quests
+[1A[2K[53/388] [node] › tests/campaign-features.spec.ts:723:7 › Quest Objectives Management › should support multiple objectives
+[1A[2K[54/388] [node] › tests/campaign-features.spec.ts:749:7 › Quest Objectives Management › should track objective progress
+[1A[2K[55/388] [node] › tests/campaign-features.spec.ts:778:7 › Quest Objectives Management › should allow quest with no objectives
+[1A[2K[56/388] [node] › tests/campaign-features.spec.ts:799:7 › Quest Rewards and Details › should track quest rewards
+[1A[2K[57/388] [node] › tests/campaign-features.spec.ts:819:7 › Quest Rewards and Details › should track quest giver
+[1A[2K[58/388] [node] › tests/campaign-features.spec.ts:839:7 › Quest Rewards and Details › should track quest location
+[1A[2K[59/388] [node] › tests/campaign-features.spec.ts:859:7 › Quest Rewards and Details › should track quest deadline
+[1A[2K[60/388] [node] › tests/campaign-features.spec.ts:884:7 › Quest Chains › should support parent quest for quest chains
+[1A[2K[61/388] [node] › tests/campaign-features.spec.ts:923:7 › Campaign Notes › should have valid note structure
+[1A[2K[62/388] [node] › tests/campaign-features.spec.ts:944:7 › Campaign Notes › should support all note categories
+[1A[2K[63/388] [node] › tests/campaign-features.spec.ts:965:7 › Campaign Notes › should support note tags
+[1A[2K[64/388] [node] › tests/campaign-features.spec.ts:983:7 › Campaign Notes › should track note creator
+[1A[2K[65/388] [node] › tests/campaign-integration.spec.ts:16:7 › Complete Campaign Lifecycle › should support full campaign workflow from creation to completion
+[1A[2K[66/388] [node] › tests/campaign-integration.spec.ts:65:7 › Complete Campaign Lifecycle › should track party level progression through campaign
+[1A[2K[67/388] [node] › tests/campaign-integration.spec.ts:188:7 › Campaign and Session Integration › should track XP progression across sessions
+[1A[2K[68/388] [node] › tests/campaign-integration.spec.ts:114:7 › Campaign and Session Integration › should link sessions to campaign chronologically
+[1A[2K[69/388] [node] › tests/campaign-integration.spec.ts:245:7 › Campaign and Session Integration › should track treasure awards across sessions
+[1A[2K[70/388] [node] › tests/campaign-integration.spec.ts:286:7 › NPC, Location, and Quest Relationships › should link NPCs to locations
+[1A[2K[71/388] [node] › tests/campaign-integration.spec.ts:343:7 › NPC, Location, and Quest Relationships › should link quests to NPCs (quest givers)
+[1A[2K[72/388] [node] › tests/campaign-integration.spec.ts:382:7 › NPC, Location, and Quest Relationships › should link quests to locations
+[1A[2K[73/388] [node] › tests/campaign-integration.spec.ts:420:7 › NPC, Location, and Quest Relationships › should support complex NPC relationships through locations
+[1A[2K[74/388] [node] › tests/campaign-integration.spec.ts:474:7 › Quest Progression Through Sessions › should track quest progress across multiple sessions
+[1A[2K[75/388] [node] › tests/campaign-integration.spec.ts:532:7 › Quest Progression Through Sessions › should support quest chains progressing through campaign
+[1A[2K[76/388] [node] › tests/campaign-integration.spec.ts:574:7 › Quest Progression Through Sessions › should handle failed quests with session notes
+[1A[2K[77/388] [node] › tests/campaign-integration.spec.ts:623:7 › Campaign Notes Integration › should link notes to NPCs, locations, and quests
+[1A[2K[78/388] [node] › tests/campaign-integration.spec.ts:669:7 › Campaign Notes Integration › should organize session notes by tags
+[1A[2K[79/388] [node] › tests/campaign-integration.spec.ts:708:7 › Character Journey Through Campaign › should track character progression through sessions
+[1A[2K[80/388] [node] › tests/campaign-integration.spec.ts:777:7 › Character Journey Through Campaign › should track multiple characters in same campaign
+[1A[2K[81/388] [node] › tests/campaign-integration.spec.ts:809:7 › Complete Campaign Snapshot › should represent full campaign state at any point
+[1A[2K[82/388] [node] › tests/campaigns.spec.ts:20:7 › Campaign Type Tests › should validate campaign structure
+[1A[2K[83/388] [node] › tests/campaigns.spec.ts:31:7 › Campaign Type Tests › should have valid campaign statuses
+[1A[2K[84/388] [node] › tests/campaigns.spec.ts:37:7 › Campaign Type Tests › should have valid difficulty levels
+[1A[2K[85/388] [node] › tests/campaigns.spec.ts:44:7 › Campaign Type Tests › should have valid editions
+[1A[2K[86/388] [node] › tests/campaigns.spec.ts:52:7 › Campaign Creation and Defaults › should create default campaign with correct structure
+[1A[2K[87/388] [node] › tests/campaigns.spec.ts:75:7 › Campaign Creation and Defaults › should have timestamps in ISO format
+[1A[2K[88/388] [node] › tests/campaigns.spec.ts:90:7 › Campaign Validation › should validate campaign name - length
+[1A[2K[89/388] [node] › tests/campaigns.spec.ts:85:7 › Campaign Validation › should validate campaign name - required
+[1A[2K[90/388] [node] › tests/campaigns.spec.ts:95:7 › Campaign Validation › should accept valid campaign names
+[1A[2K[91/388] [node] › tests/campaigns.spec.ts:101:7 › Campaign Validation › should validate campaign description length
+[1A[2K[92/388] [node] › tests/campaigns.spec.ts:108:7 › Campaign Validation › should accept valid campaign descriptions
+[1A[2K[93/388] [node] › tests/campaigns.spec.ts:116:7 › Campaign Status Functions › should get correct status colors
+[1A[2K[94/388] [node] › tests/campaigns.spec.ts:123:7 › Campaign Status Functions › should get correct status background colors
+[1A[2K[95/388] [node] › tests/campaigns.spec.ts:130:7 › Campaign Status Functions › should get correct status labels
+[1A[2K[96/388] [node] › tests/campaigns.spec.ts:139:7 › Campaign Difficulty Functions › should get correct difficulty colors
+[1A[2K[97/388] [node] › tests/campaigns.spec.ts:146:7 › Campaign Difficulty Functions › should get correct difficulty labels
+[1A[2K[98/388] [node] › tests/campaigns.spec.ts:155:7 › Campaign Date Functions › should format campaign dates correctly
+[1A[2K[99/388] [node] › tests/campaigns.spec.ts:164:7 › Campaign Date Functions › should calculate campaign duration
+[1A[2K[100/388] [node] › tests/campaigns.spec.ts:174:7 › Campaign Date Functions › should handle future dates in duration calculation
+[1A[2K[101/388] [node] › tests/campaigns.spec.ts:185:7 › Campaign Sessions › should have valid session structure
+[1A[2K[102/388] [node] › tests/campaigns.spec.ts:199:7 › Campaign Sessions › should track XP awards
+[1A[2K[103/388] [node] › tests/campaigns.spec.ts:204:7 › Campaign Sessions › should track treasure awards
+[1A[2K[104/388] [node] › tests/campaigns.spec.ts:210:7 › Campaign Sessions › should track session duration in minutes
+[1A[2K[105/388] [node] › tests/campaigns.spec.ts:217:7 › Campaign Quests › should have valid quest structure
+[1A[2K[106/388] [node] › tests/campaigns.spec.ts:230:7 › Campaign Quests › should track quest objectives
+[1A[2K[107/388] [node] › tests/campaigns.spec.ts:238:7 › Campaign Quests › should have optional and required objectives
+[1A[2K[108/388] [node] › tests/campaigns.spec.ts:246:7 › Campaign Quests › should track quest rewards
+[1A[2K[109/388] [node] › tests/campaigns.spec.ts:253:7 › Campaign Quests › should track quest giver
+[1A[2K[110/388] [node] › tests/campaigns.spec.ts:260:7 › Campaign Integration › should link campaigns to sessions
+[1A[2K[111/388] [node] › tests/campaigns.spec.ts:267:7 › Campaign Integration › should link campaigns to quests
+[1A[2K[112/388] [node] › tests/campaigns.spec.ts:274:7 › Campaign Integration › should track campaign progress through session count
+[1A[2K[113/388] [node] › tests/campaigns.spec.ts:282:7 › Campaign Integration › should track party level progression
+[1A[2K[114/388] [node] › tests/campaigns.spec.ts:290:7 › Campaign Integration › should manage player and character lists
+[1A[2K[115/388] [node] › tests/campaigns.spec.ts:298:7 › Campaign Integration › should support next session scheduling
+[1A[2K[116/388] [node] › tests/campaigns.spec.ts:310:7 › Campaign Tags and Metadata › should support campaign tags
+[1A[2K[117/388] [node] › tests/campaigns.spec.ts:318:7 › Campaign Tags and Metadata › should support public/private visibility
+[1A[2K[118/388] [node] › tests/campaigns.spec.ts:323:7 › Campaign Tags and Metadata › should support campaign images
+[1A[2K[119/388] [node] › tests/campaigns.spec.ts:329:7 › Campaign Tags and Metadata › should support homebrew flag
+[1A[2K[120/388] [node] › tests/campaigns.spec.ts:336:7 › Campaign Lifecycle › should transition through valid statuses
+[1A[2K[121/388] [node] › tests/campaigns.spec.ts:344:7 › Campaign Lifecycle › should track creation and update timestamps
+[1A[2K[122/388] [node] › tests/campaigns.spec.ts:353:7 › Campaign Lifecycle › completed campaign should have full session history
+[1A[2K[123/388] [node] › tests/campaigns.spec.ts:363:7 › Campaign Settings › should support various campaign settings
+[1A[2K[124/388] [node] › tests/campaigns.spec.ts:374:7 › Campaign Settings › should have start date
+[1A[2K[125/388] [node] › tests/character-mechanics.spec.ts:81:7 › Character Structure Tests › should have valid character structure
+[1A[2K[126/388] [node] › tests/character-mechanics.spec.ts:103:7 › Character Structure Tests › should have valid spell slots structure for spellcasters
+[1A[2K[127/388] [node] › tests/character-mechanics.spec.ts:92:7 › Character Structure Tests › should have valid ability scores
+[1A[2K[128/388] [node] › tests/character-mechanics.spec.ts:117:7 › Character Structure Tests › should have valid hit dice structure
+[1A[2K[129/388] [node] › tests/character-mechanics.spec.ts:132:7 › Short Rest Mechanics › should restore HP during short rest
+[1A[2K[130/388] [node] › tests/character-mechanics.spec.ts:145:7 › Short Rest Mechanics › should not exceed max HP during short rest
+[1A[2K[131/388] [node] › tests/character-mechanics.spec.ts:158:7 › Short Rest Mechanics › short rest should not restore spell slots
+[1A[2K[132/388] [node] › tests/character-mechanics.spec.ts:171:7 › Short Rest Mechanics › should calculate actual healing during short rest
+[1A[2K[133/388] [node] › tests/character-mechanics.spec.ts:186:7 › Long Rest Mechanics › should fully restore HP during long rest
+[1A[2K[134/388] [node] › tests/character-mechanics.spec.ts:197:7 › Long Rest Mechanics › should restore all spell slots during long rest
+[1A[2K[135/388] [node] › tests/character-mechanics.spec.ts:214:7 › Long Rest Mechanics › should recover hit dice during long rest
+[1A[2K[136/388] [node] › tests/character-mechanics.spec.ts:228:7 › Long Rest Mechanics › should recover at least 1 hit die during long rest
+[1A[2K[137/388] [node] › tests/character-mechanics.spec.ts:241:7 › Long Rest Mechanics › should restore HP, spell slots, and hit dice during long rest
+[1A[2K[138/388] [node] › tests/character-mechanics.spec.ts:273:7 › Spell Slot Tracking › should use spell slot correctly
+[1A[2K[139/388] [node] › tests/character-mechanics.spec.ts:285:7 › Spell Slot Tracking › should not use more spell slots than total
+[1A[2K[140/388] [node] › tests/character-mechanics.spec.ts:294:7 › Spell Slot Tracking › should track multiple spell slot levels
+[1A[2K[141/388] [node] › tests/character-mechanics.spec.ts:306:7 › Spell Slot Tracking › should toggle spell slot used/available
+[1A[2K[142/388] [node] › tests/character-mechanics.spec.ts:320:7 › Spell Slot Tracking › should have different spell slots for different caster levels
+[1A[2K[143/388] [node] › tests/character-mechanics.spec.ts:342:7 › Spell Slot Tracking › non-spellcasters should not have spell slots
+[1A[2K[144/388] [node] › tests/character-mechanics.spec.ts:353:7 › Hit Dice Usage › should spend hit dice during short rest
+[1A[2K[145/388] [node] › tests/character-mechanics.spec.ts:364:7 › Hit Dice Usage › should not spend more hit dice than available
+[1A[2K[146/388] [node] › tests/character-mechanics.spec.ts:374:7 › Hit Dice Usage › should match hit die type to class
+[1A[2K[147/388] [node] › tests/character-mechanics.spec.ts:395:7 › Hit Dice Usage › hit dice total should match character level
+[1A[2K[148/388] [node] › tests/character-mechanics.spec.ts:418:7 › HP Management › should track temporary HP separately
+[1A[2K[149/388] [node] › tests/character-mechanics.spec.ts:406:7 › HP Management › should not have current HP exceed max HP
+[1A[2K[150/388] [node] › tests/character-mechanics.spec.ts:429:7 › HP Management › should allow current HP to be 0
+[1A[2K[151/388] [node] › tests/characters.spec.ts:34:7 › Character Structure Tests › should have all six ability scores
+[1A[2K[152/388] [node] › tests/characters.spec.ts:21:7 › Character Structure Tests › should have valid character structure
+[1A[2K[153/388] [node] › tests/characters.spec.ts:47:7 › Character Structure Tests › should have valid class information
+[1A[2K[154/388] [node] › tests/characters.spec.ts:59:7 › Ability Score Calculations › should calculate ability modifiers correctly
+[1A[2K[155/388] [node] › tests/characters.spec.ts:69:7 › Ability Score Calculations › should format modifiers with sign
+[1A[2K[156/388] [node] › tests/characters.spec.ts:75:7 › Ability Score Calculations › should calculate proficiency bonus by level
+[1A[2K[157/388] [node] › tests/characters.spec.ts:90:7 › Skill Calculations › should calculate skill modifiers with proficiency
+[1A[2K[158/388] [node] › tests/characters.spec.ts:107:7 › Skill Calculations › should calculate skill modifiers with expertise
+[1A[2K[159/388] [node] › tests/characters.spec.ts:124:7 › Skill Calculations › should calculate skill modifiers without proficiency
+[1A[2K[160/388] [node] › tests/characters.spec.ts:143:7 › Saving Throw Calculations › should calculate saving throws with proficiency
+[1A[2K[161/388] [node] › tests/characters.spec.ts:166:7 › Experience and Level › should calculate level from XP
+[1A[2K[162/388] [node] › tests/characters.spec.ts:158:7 › Experience and Level › should get XP requirements for levels
+[1A[2K[163/388] [node] › tests/characters.spec.ts:174:7 › Experience and Level › should calculate total level from multiclassing
+[1A[2K[164/388] [node] › tests/characters.spec.ts:183:7 › Experience and Level › characters should have correct XP for their level
+[1A[2K[165/388] [node] › tests/characters.spec.ts:192:7 › Hit Points › current HP should not exceed max HP
+[1A[2K[166/388] [node] › tests/characters.spec.ts:199:7 › Hit Points › should track temporary HP separately
+[1A[2K[167/388] [node] › tests/characters.spec.ts:216:7 › Inventory and Equipment › should track inventory items
+[1A[2K[168/388] [node] › tests/characters.spec.ts:204:7 › Hit Points › should track hit dice
+[1A[2K[169/388] [node] › tests/characters.spec.ts:229:7 › Inventory and Equipment › should calculate total weight
+[1A[2K[170/388] [node] › tests/characters.spec.ts:236:7 › Inventory and Equipment › should calculate total value
+[1A[2K[171/388] [node] › tests/characters.spec.ts:243:7 › Inventory and Equipment › should calculate max carry weight
+[1A[2K[172/388] [node] › tests/characters.spec.ts:250:7 › Inventory and Equipment › should track currency
+[1A[2K[173/388] [node] › tests/characters.spec.ts:260:7 › Inventory and Equipment › should track equipped and attuned items
+[1A[2K[174/388] [node] › tests/characters.spec.ts:272:7 › Spellcasting › spellcasters should have spell slots
+[1A[2K[175/388] [node] › tests/characters.spec.ts:280:7 › Spellcasting › spell slots should track usage
+[1A[2K[176/388] [node] › tests/characters.spec.ts:297:7 › Spellcasting › non-spellcasters should not have spell data
+[1A[2K[177/388] [node] › tests/characters.spec.ts:289:7 › Spellcasting › should track known and prepared spells
+[1A[2K[178/388] [node] › tests/characters.spec.ts:305:7 › Character Creation › should create default character
+[1A[2K[179/388] [node] › tests/characters.spec.ts:317:7 › Character Creation › default character should have 10 in all abilities
+[1A[2K[180/388] [node] › tests/characters.spec.ts:327:7 › Character Integration › should link to campaign
+[1A[2K[181/388] [node] › tests/characters.spec.ts:334:7 › Character Integration › should have fighter with high strength
+[1A[2K[182/388] [node] › tests/characters.spec.ts:341:7 › Character Integration › should have wizard with high intelligence
+[1A[2K[183/388] [node] › tests/characters.spec.ts:348:7 › Character Integration › should have rogue with high dexterity and expertise
+[1A[2K[184/388] [node] › tests/characters.spec.ts:360:7 › Character Features and Traits › should have class features
+[1A[2K[185/388] [node] › tests/characters.spec.ts:367:7 › Character Features and Traits › should have racial traits
+[1A[2K[186/388] [node] › tests/characters.spec.ts:373:7 › Character Features and Traits › fighter should have Second Wind and Action Surge
+[1A[2K[187/388] [node] › tests/characters.spec.ts:380:7 › Character Features and Traits › wizard should have Spellcasting
+[1A[2K[188/388] [node] › tests/characters.spec.ts:386:7 › Character Features and Traits › rogue should have Sneak Attack
+[1A[2K[189/388] [node] › tests/combat.spec.ts:28:7 › Combat Structure Tests › should have valid combatant structure
+[1A[2K[190/388] [node] › tests/combat.spec.ts:40:7 › Combat Structure Tests › should have valid encounter structure
+[1A[2K[191/388] [node] › tests/combat.spec.ts:62:7 › Initiative System › should add modifier to initiative roll
+[1A[2K[192/388] [node] › tests/combat.spec.ts:54:7 › Initiative System › should roll initiative within valid range
+[1A[2K[193/388] [node] › tests/combat.spec.ts:75:7 › Initiative System › should sort combatants by initiative descending
+[1A[2K[194/388] [node] › tests/combat.spec.ts:82:7 › Initiative System › should use initiative modifier as tiebreaker
+[1A[2K[195/388] [node] › tests/combat.spec.ts:96:7 › Hit Points › should calculate HP percentage correctly
+[1A[2K[196/388] [node] › tests/combat.spec.ts:106:7 › Hit Points › should get HP color based on percentage
+[1A[2K[197/388] [node] › tests/combat.spec.ts:116:7 › Hit Points › should get HP text color based on percentage
+[1A[2K[198/388] [node] › tests/combat.spec.ts:123:7 › Hit Points › should detect dead combatants
+[1A[2K[199/388] [node] › tests/combat.spec.ts:131:7 › Hit Points › should detect bloodied combatants
+[1A[2K[200/388] [node] › tests/combat.spec.ts:141:7 › Damage and Healing › should apply damage to current HP
+[1A[2K[201/388] [node] › tests/combat.spec.ts:155:7 › Damage and Healing › should apply damage to temporary HP first
+[1A[2K[202/388] [node] › tests/combat.spec.ts:169:7 › Damage and Healing › should overflow damage from temp HP to current HP
+[1A[2K[203/388] [node] › tests/combat.spec.ts:183:7 › Damage and Healing › should not reduce HP below 0
+[1A[2K[204/388] [node] › tests/combat.spec.ts:196:7 › Damage and Healing › should heal combatant
+[1A[2K[205/388] [node] › tests/combat.spec.ts:209:7 › Damage and Healing › should not heal above max HP
+[1A[2K[206/388] [node] › tests/combat.spec.ts:232:7 › Conditions › should add condition to combatant
+[1A[2K[207/388] [node] › tests/combat.spec.ts:224:7 › Conditions › should have valid condition structure
+[1A[2K[208/388] [node] › tests/combat.spec.ts:244:7 › Conditions › should not add duplicate conditions
+[1A[2K[209/388] [node] › tests/combat.spec.ts:255:7 › Conditions › should remove condition from combatant
+[1A[2K[210/388] [node] › tests/combat.spec.ts:266:7 › Conditions › should decrement condition durations
+[1A[2K[211/388] [node] › tests/combat.spec.ts:277:7 › Conditions › should remove expired conditions
+[1A[2K[212/388] [node] › tests/combat.spec.ts:288:7 › Conditions › should not decrement permanent conditions
+[1A[2K[213/388] [node] › tests/combat.spec.ts:300:7 › Conditions › should have descriptions for all D&D conditions
+[1A[2K[214/388] [node] › tests/combat.spec.ts:314:7 › Combat Encounter Management › should track combat rounds
+[1A[2K[215/388] [node] › tests/combat.spec.ts:320:7 › Combat Encounter Management › should track current turn
+[1A[2K[216/388] [node] › tests/combat.spec.ts:341:7 › Combat Encounter Management › should link encounter to campaign
+[1A[2K[217/388] [node] › tests/combat.spec.ts:349:7 › Combatant Types › should have players, monsters, and NPCs
+[1A[2K[218/388] [node] › tests/combat.spec.ts:357:7 › Combatant Types › players should link to character IDs
+[1A[2K[219/388] [node] › tests/combat.spec.ts:327:7 › Combat Encounter Management › should maintain combat log
+[1A[2K[220/388] [node] › tests/combat.spec.ts:365:7 › Combatant Types › should create default combatant
+[1A[2K[221/388] [node] › tests/combat.spec.ts:379:7 › Combat Integration › should integrate characters into combat
+[1A[2K[222/388] [node] › tests/combat.spec.ts:387:7 › Combat Integration › player HP should match character HP at start
+[1A[2K[223/388] [node] › tests/combat.spec.ts:392:7 › Combat Integration › should track conditions affecting combat
+[1A[2K[224/388] [node] › tests/combat.spec.ts:399:7 › Combat Integration › sorted combatants should have rogue first (highest initiative)
+[1A[2K[225/388] [node] › tests/combat.spec.ts:408:7 › Death Saves System › should initialize death saves with 0 successes and 0 failures
+[1A[2K[226/388] [node] › tests/combat.spec.ts:415:7 › Death Saves System › should add death save success
+[1A[2K[227/388] [node] › tests/combat.spec.ts:428:7 › Death Saves System › should add multiple death save successes
+[1A[2K[228/388] [node] › tests/combat.spec.ts:441:7 › Death Saves System › should cap death save successes at 3
+[1A[2K[229/388] [node] › tests/combat.spec.ts:456:7 › Death Saves System › should add death save failure
+[1A[2K[230/388] [node] › tests/combat.spec.ts:469:7 › Death Saves System › should add multiple death save failures
+[1A[2K  1) [node] › tests/combat.spec.ts:408:7 › Death Saves System › should initialize death saves with 0 successes and 0 failures 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31mundefined[39m
+
+      409 |     const deathSaves = initializeDeathSaves();
+      410 |
+    > 411 |     expect(deathSaves.successes).toBe(0);
+          |                                  ^
+      412 |     expect(deathSaves.failures).toBe(0);
+      413 |   });
+      414 |
+        at /Users/pekka/Documents/dandd/dnd-campaign-manager/tests/combat.spec.ts:411:34
+
+
+[1A[2K[231/388] [node] › tests/combat.spec.ts:497:7 › Death Saves System › should reset death saves
+[1A[2K[232/388] [node] › tests/combat.spec.ts:509:7 › Death Saves System › should detect stable combatant (3 successes)
+[1A[2K[233/388] [node] › tests/combat.spec.ts:519:7 › Death Saves System › should detect not stable combatant (less than 3 successes)
+[1A[2K[234/388] [node] › tests/combat.spec.ts:529:7 › Death Saves System › should detect stable if no death saves (above 0 HP)
+[1A[2K[235/388] [node] › tests/combat.spec.ts:538:7 › Death Saves System › should detect permanently dead combatant (3 failures)
+[1A[2K[236/388] [node] › tests/combat.spec.ts:548:7 › Death Saves System › should detect not permanently dead combatant (less than 3 failures)
+[1A[2K[237/388] [node] › tests/combat.spec.ts:558:7 › Death Saves System › should not be permanently dead if no death saves (above 0 HP)
+[1A[2K  2) [node] › tests/combat.spec.ts:529:7 › Death Saves System › should detect stable if no death saves (above 0 HP) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      533 |     };
+      534 |
+    > 535 |     expect(isStable(combatant)).toBe(true);
+          |                                 ^
+      536 |   });
+      537 |
+      538 |   test('should detect permanently dead combatant (3 failures)', () => {
+        at /Users/pekka/Documents/dandd/dnd-campaign-manager/tests/combat.spec.ts:535:33
+
+
+[1A[2K[238/388] [node] › tests/combat.spec.ts:581:7 › Death Saves System › should track mixed successes and failures
+[1A[2K[239/388] [node] › tests/dice-roller.spec.ts:13:7 › Dice Roll Structure › should have valid dice roll structure
+[1A[2K[240/388] [node] › tests/dice-roller.spec.ts:26:7 › Dice Roll Structure › should store individual dice rolls
+[1A[2K[241/388] [node] › tests/dice-roller.spec.ts:38:7 › Basic Dice Rolling › d4 should roll between 1 and 4
+[1A[2K[242/388] [node] › tests/combat.spec.ts:482:7 › Death Saves System › should cap death save failures at 3
+[1A[2K  3) [node] › tests/combat.spec.ts:482:7 › Death Saves System › should cap death save failures at 3 
+
+    Error: worker process exited unexpectedly (code=null, signal=SIGINT)
+
+
+[1A[2K[243/388] [node] › tests/combat.spec.ts:567:7 › Death Saves System › death saves should not affect monsters
+[1A[2K  4) [node] › tests/combat.spec.ts:567:7 › Death Saves System › death saves should not affect monsters 
+
+    Error: worker process exited unexpectedly (code=null, signal=SIGINT)
+
+
+[1A[2K[244/388] [node] › tests/dice-roller.spec.ts:54:7 › Basic Dice Rolling › d8 should roll between 1 and 8
+[1A[2K  5) [node] › tests/dice-roller.spec.ts:54:7 › Basic Dice Rolling › d8 should roll between 1 and 8 ─
+
+    Error: worker process exited unexpectedly (code=null, signal=SIGINT)
+
+
+[1A[2K[245/388] [node] › tests/dice-roller.spec.ts:46:7 › Basic Dice Rolling › d6 should roll between 1 and 6
+[1A[2K  6) [node] › tests/dice-roller.spec.ts:46:7 › Basic Dice Rolling › d6 should roll between 1 and 6 ─
+
+    Error: worker process exited unexpectedly (code=null, signal=SIGINT)
+
+
+[1A[2K  6 failed
+    [node] › tests/combat.spec.ts:408:7 › Death Saves System › should initialize death saves with 0 successes and 0 failures 
+    [node] › tests/combat.spec.ts:482:7 › Death Saves System › should cap death save failures at 3 ─
+    [node] › tests/combat.spec.ts:529:7 › Death Saves System › should detect stable if no death saves (above 0 HP) 
+    [node] › tests/combat.spec.ts:567:7 › Death Saves System › death saves should not affect monsters 
+    [node] › tests/dice-roller.spec.ts:46:7 › Basic Dice Rolling › d6 should roll between 1 and 6 ──
+    [node] › tests/dice-roller.spec.ts:54:7 › Basic Dice Rolling › d8 should roll between 1 and 8 ──
+  143 did not run
+  239 passed (1.3s)
+
+[36m  Serving HTML report at http://localhost:57223. Press Ctrl+C to quit.[39m

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- D20 dice shape -->
+  <polygon points="50,10 80,35 80,65 50,90 20,65 20,35" fill="url(#grad)" stroke="#fbbf24" stroke-width="2"/>
+  <polygon points="50,10 65,25 50,40 35,25" fill="#a78bfa" opacity="0.6"/>
+  <polygon points="50,90 65,75 50,60 35,75" fill="#6d28d9" opacity="0.6"/>
+  <!-- Number 20 -->
+  <text x="50" y="58" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#fbbf24" text-anchor="middle">20</text>
+</svg>
