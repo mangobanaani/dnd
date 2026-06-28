@@ -119,6 +119,35 @@ To enable Google/Facebook login:
 - Configure OAuth apps in Google Cloud Console and Facebook Developers
 - Add OAuth credentials to Supabase dashboard
 
+## Docker
+
+A production image is published to the GitHub Container Registry on each tagged release.
+
+Pull and run the latest release:
+
+```bash
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key \
+  -e SUPABASE_SERVICE_ROLE_KEY=your-service-role-key \
+  ghcr.io/mangobanaani/dnd:latest
+```
+
+The app is then available at http://localhost:3000.
+
+Because Next.js inlines `NEXT_PUBLIC_*` values into the client bundle at build time,
+the published image is built with the registry's configured values. To bake in your
+own Supabase project, build the image yourself:
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key \
+  -t dnd-campaign-manager .
+```
+
+Tags follow semver: `latest`, `0`, `0.1`, and `0.1.0`.
+
 ## Project Structure
 
 ```
