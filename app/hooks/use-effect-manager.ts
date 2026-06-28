@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * useEffectManager Hook
  * Manages effects on characters and combatants

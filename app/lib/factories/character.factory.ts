@@ -106,7 +106,7 @@ export function createCharacterFromTemplate(
  * Initialize effects field for older characters
  * Used for data migration
  */
-export function initializeCharacterEffects(character: any): Character {
+export function initializeCharacterEffects(character: Omit<Character, 'effects'> & { effects?: Effect[] }): Character {
   return {
     ...character,
     effects: character.effects ?? [],

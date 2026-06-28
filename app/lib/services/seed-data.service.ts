@@ -44,42 +44,56 @@ export class SeedDataService {
 
       // Load Campaign
       const campaignService = new StorageService('dnd-campaigns');
-      campaignService.add(dragonlanceSeedData.campaign);
+      if (!campaignService.getById(dragonlanceSeedData.campaign.id)) {
+        campaignService.add(dragonlanceSeedData.campaign);
+      }
 
       // Load Characters
       const characterService = new StorageService('dnd-characters');
       for (const character of dragonlanceSeedData.characters) {
-        characterService.add(character);
+        if (!characterService.getById(character.id)) {
+          characterService.add(character);
+        }
       }
 
       // Load Locations (stored as campaign notes or custom data)
       const locationService = new StorageService('dnd-locations');
       for (const location of dragonlanceSeedData.locations) {
-        locationService.add(location);
+        if (!locationService.getById(location.id)) {
+          locationService.add(location);
+        }
       }
 
       // Load Sessions
       const sessionService = new StorageService('dnd-sessions');
       for (const session of dragonlanceExtendedData.sessions) {
-        sessionService.add(session);
+        if (!sessionService.getById(session.id)) {
+          sessionService.add(session);
+        }
       }
 
       // Load Encounters
       const encounterService = new StorageService('dnd-saved-encounters');
       for (const encounter of dragonlanceExtendedData.encounters) {
-        encounterService.add(encounter);
+        if (!encounterService.getById(encounter.id)) {
+          encounterService.add(encounter);
+        }
       }
 
       // Load NPCs
       const npcService = new StorageService('dnd-npcs');
       for (const npc of dragonlanceExtendedData.npcs) {
-        npcService.add(npc);
+        if (!npcService.getById(npc.id)) {
+          npcService.add(npc);
+        }
       }
 
       // Load Quests
       const questService = new StorageService('dnd-quests');
       for (const quest of dragonlanceExtendedData.quests) {
-        questService.add(quest);
+        if (!questService.getById(quest.id)) {
+          questService.add(quest);
+        }
       }
 
       // Mark seed data as loaded

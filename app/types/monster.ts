@@ -173,22 +173,36 @@ export function crToXP(cr: string): number {
 
 /**
  * Get difficulty multiplier for encounter building
- * Based on number of monsters in encounter
+ * Based on number of monsters in encounter (DMG p.83)
+ * Optional partySize adjusts tier: <3 players shifts up one tier, >=6 shifts down one tier
  */
-export function getEncounterMultiplier(monsterCount: number): number {
-  if (monsterCount === 1) return 1;
-  if (monsterCount === 2) return 1.5;
-  if (monsterCount >= 3 && monsterCount <= 6) return 2;
-  if (monsterCount >= 7 && monsterCount <= 10) return 2.5;
-  if (monsterCount >= 11 && monsterCount <= 14) return 3;
-  return 4; // 15+
+export function getEncounterMultiplier(monsterCount: number, partySize?: number): number {
+  const tiers = [1, 1.5, 2, 2.5, 3, 4];
+
+  let tierIndex: number;
+  if (monsterCount === 1) tierIndex = 0;
+  else if (monsterCount === 2) tierIndex = 1;
+  else if (monsterCount >= 3 && monsterCount <= 6) tierIndex = 2;
+  else if (monsterCount >= 7 && monsterCount <= 10) tierIndex = 3;
+  else if (monsterCount >= 11 && monsterCount <= 14) tierIndex = 4;
+  else tierIndex = 5; // 15+
+
+  if (partySize !== undefined) {
+    if (partySize < 3) {
+      tierIndex = Math.min(tierIndex + 1, tiers.length - 1);
+    } else if (partySize >= 6) {
+      tierIndex = Math.max(tierIndex - 1, 0);
+    }
+  }
+
+  return tiers[tierIndex];
 }
 
 /**
  * Calculate adjusted XP for encounter building
  */
-export function calculateAdjustedXP(monsters: Monster[]): number {
+export function calculateAdjustedXP(monsters: Monster[], partySize?: number): number {
   const totalXP = monsters.reduce((sum, monster) => sum + crToXP(monster.cr), 0);
-  const multiplier = getEncounterMultiplier(monsters.length);
+  const multiplier = getEncounterMultiplier(monsters.length, partySize);
   return Math.round(totalXP * multiplier);
 }

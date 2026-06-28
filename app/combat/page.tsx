@@ -217,14 +217,15 @@ export default function CombatTrackerPage() {
         ac: char.armorClass,
         isActive: true,
         conditions: [],
-        effects: [],
-        exhaustionLevel: 0,
+        effects: char.effects ?? [],
+        exhaustionLevel: char.exhaustionLevel ?? 0,
+        concentration: char.concentration,
         characterId: char.id,
         addedAt: new Date().toISOString(),
       };
     });
 
-    setCombatants([...combatants, ...newCombatants]);
+    setCombatants(prev => [...prev, ...newCombatants]);
 
     // Log each character added
     newCombatants.forEach(combatant => {
@@ -253,7 +254,7 @@ export default function CombatTrackerPage() {
     }
 
     // Calculate XP budget using shared thresholds
-    const levelThresholds = getXPThreshold(Math.min(partyLevel, 10), 10);
+    const levelThresholds = getXPThreshold(partyLevel, 10);
     const xpBudget = levelThresholds[encounterDifficulty] * partySize;
 
     // Filter monsters by appropriate CR (roughly party level +/- 2)
@@ -306,7 +307,7 @@ export default function CombatTrackerPage() {
       };
     });
 
-    setCombatants([...combatants, ...newCombatants]);
+    setCombatants(prev => [...prev, ...newCombatants]);
 
     // Log encounter
     addLog('other', '', 'System', `🎲 Random encounter generated: ${encounterMonsters.map(m => m.name).join(', ')}`);
@@ -341,7 +342,7 @@ export default function CombatTrackerPage() {
         ac: validated.ac,
       };
 
-      setCombatants([...combatants, combatant]);
+      setCombatants(prev => [...prev, combatant]);
       addLog('initiative', combatant.id, combatant.name, `${combatant.name} rolled initiative: ${combatant.initiative}`);
 
       // Reset form
@@ -365,11 +366,11 @@ export default function CombatTrackerPage() {
     if (combatant) {
       addLog('other', id, combatant.name, `${combatant.name} removed from combat`);
     }
-    setCombatants(combatants.filter((c) => c.id !== id));
+    setCombatants(prev => prev.filter((c) => c.id !== id));
   };
 
   const updateCombatant = (id: string, updates: Partial<Combatant>) => {
-    setCombatants(combatants.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+    setCombatants(prev => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   };
 
   const takeDamage = (id: string, amount: number) => {
@@ -470,10 +471,32 @@ export default function CombatTrackerPage() {
       updateCombatant(currentCombatant.id, updated);
     }
 
-    const nextIndex = (currentTurn + 1) % sortedCombatants.length;
+    // Scan forward past inactive (dead) combatants
+    const len = sortedCombatants.length;
+    let nextIndex = currentTurn;
+    let roundIncremented = false;
+    let foundActive = false;
+
+    for (let i = 1; i <= len; i++) {
+      const candidate = (currentTurn + i) % len;
+      if (candidate === 0 && !roundIncremented) {
+        roundIncremented = true;
+      }
+      if (sortedCombatants[candidate].isActive) {
+        nextIndex = candidate;
+        foundActive = true;
+        break;
+      }
+    }
+
+    if (!foundActive) {
+      // No active combatants remain; leave turn unchanged
+      return;
+    }
+
     setCurrentTurn(nextIndex);
 
-    if (nextIndex === 0) {
+    if (roundIncremented) {
       const newRound = currentRound + 1;
       setCurrentRound(newRound);
       addLog('other', '', 'System', `--- Round ${newRound} begins ---`);
@@ -559,17 +582,18 @@ export default function CombatTrackerPage() {
       return;
     }
 
-    // Reorder by swapping initiative values
-    const newCombatants = [...combatants];
-    const draggedCombatant = newCombatants.find(c => c.id === draggedId);
-    const targetCombatant = newCombatants.find(c => c.id === targetId);
+    // Reorder by swapping initiative values without mutating existing objects
+    const draggedCombatant = combatants.find(c => c.id === draggedId);
+    const targetCombatant = combatants.find(c => c.id === targetId);
 
     if (draggedCombatant && targetCombatant) {
-      // Swap initiative values to maintain sort order
-      const tempInitiative = draggedCombatant.initiative;
-      draggedCombatant.initiative = targetCombatant.initiative;
-      targetCombatant.initiative = tempInitiative;
-
+      const draggedInit = draggedCombatant.initiative;
+      const targetInit = targetCombatant.initiative;
+      const newCombatants = combatants.map(c =>
+        c.id === draggedId ? { ...c, initiative: targetInit } :
+        c.id === targetId ? { ...c, initiative: draggedInit } :
+        c
+      );
       setCombatants(newCombatants);
       addLog('other', draggedId, draggedCombatant.name, `${draggedCombatant.name} moved in initiative order`);
     }
@@ -878,9 +902,9 @@ export default function CombatTrackerPage() {
                         {/* Conditions */}
                         {combatant.conditions.length > 0 && (
                           <div className="flex flex-wrap gap-2">
-                            {combatant.conditions.map((condition, idx) => (
+                            {combatant.conditions.map((condition) => (
                               <button
-                                key={idx}
+                                key={condition.name}
                                 onClick={() => removeConditionFromCombatant(combatant.id, condition.name)}
                                 className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 transition-colors"
                                 title={`Click to remove. ${condition.description}`}

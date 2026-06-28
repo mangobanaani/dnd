@@ -94,21 +94,26 @@ describe('Campaign Role Helpers', () => {
   });
 
   describe('canApplyEffects', () => {
+    const mockCharacters = [
+      { id: 'char-1', playerId: 'user-player1' },
+      { id: 'char-2', playerId: 'user-player2' },
+    ];
+
     it('should allow DM to apply effects to anyone', () => {
-      expect(canApplyEffects(mockCampaign, 'user-dm', 'char-1')).toBe(true);
-      expect(canApplyEffects(mockCampaign, 'user-dm', 'char-2')).toBe(true);
+      expect(canApplyEffects(mockCampaign, 'user-dm', 'char-1', mockCharacters)).toBe(true);
+      expect(canApplyEffects(mockCampaign, 'user-dm', 'char-2', mockCharacters)).toBe(true);
     });
 
     it('should allow player to apply effects to own character', () => {
-      expect(canApplyEffects(mockCampaign, 'user-player1', 'char-1')).toBe(true);
+      expect(canApplyEffects(mockCampaign, 'user-player1', 'char-1', mockCharacters)).toBe(true);
     });
 
     it('should not allow player to apply effects to other characters', () => {
-      expect(canApplyEffects(mockCampaign, 'user-player1', 'char-2')).toBe(false);
+      expect(canApplyEffects(mockCampaign, 'user-player1', 'char-2', mockCharacters)).toBe(false);
     });
 
     it('should not allow non-member to apply effects', () => {
-      expect(canApplyEffects(mockCampaign, 'user-stranger', 'char-1')).toBe(false);
+      expect(canApplyEffects(mockCampaign, 'user-stranger', 'char-1', mockCharacters)).toBe(false);
     });
   });
 

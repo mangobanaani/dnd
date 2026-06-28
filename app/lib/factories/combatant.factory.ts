@@ -81,7 +81,7 @@ export function createCombatantFromMonster(
  * Initialize effects field for older combatants
  * Used for data migration
  */
-export function initializeCombatantEffects(combatant: any): Combatant {
+export function initializeCombatantEffects(combatant: Omit<Combatant, 'effects'> & { effects?: Effect[] }): Combatant {
   return {
     ...combatant,
     effects: combatant.effects ?? [],

@@ -111,6 +111,9 @@ export function Header() {
             <QuickDiceRoller />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
               className="p-2 text-[#fafafa] hover:bg-[#27272a] rounded-lg transition-colors"
             >
               {mobileMenuOpen ? '✕' : '☰'}
@@ -120,7 +123,7 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-3 pb-2 space-y-1 glass-card rounded-lg p-3">
+          <div id="mobile-menu" className="md:hidden mt-3 pb-2 space-y-1 glass-card rounded-lg p-3">
             {navItems.map((item) => (
               <Link
                 key={item.href}

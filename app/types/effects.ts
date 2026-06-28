@@ -111,7 +111,7 @@ export function validateEffect(effect: Effect): void {
     if (effect.roundsRemaining === undefined || effect.roundsRemaining === null) {
       throw new Error('roundsRemaining is required for round-based effects');
     }
-    if (effect.roundsRemaining < 0) {
+    if (effect.roundsRemaining <= 0) {
       throw new Error('roundsRemaining must be positive');
     }
   }

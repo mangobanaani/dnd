@@ -195,9 +195,14 @@ export default function CreateCharacterPage() {
     };
 
     // Save to localStorage for now
-    const existingCharacters = JSON.parse(
-      localStorage.getItem('dnd-characters') || '[]'
-    );
+    let existingCharacters: object[] = [];
+    try {
+      existingCharacters = JSON.parse(
+        localStorage.getItem('dnd-characters') || '[]'
+      );
+    } catch {
+      existingCharacters = [];
+    }
     localStorage.setItem(
       'dnd-characters',
       JSON.stringify([...existingCharacters, character])

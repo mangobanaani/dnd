@@ -71,7 +71,7 @@ export function useEncounter(initialPartySize: number = 4, initialPartyLevel: nu
 
     const totalMonsters = allMonsters.length;
     const totalXP = allMonsters.reduce((sum, m) => sum + crToXP(m.cr), 0);
-    const adjustedXP = calculateAdjustedXP(allMonsters);
+    const adjustedXP = calculateAdjustedXP(allMonsters, partySize);
 
     const thresholds = getXPThreshold(partyLevel, 5);
     const partyEasy = thresholds.easy * partySize;

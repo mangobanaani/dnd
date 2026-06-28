@@ -105,7 +105,7 @@ const effectSchema = z.object({
   appliedTo: z.string(),
   effectType: z.enum(['spell', 'item', 'feature', 'condition']),
   durationType: z.enum(['rounds', 'saves', 'time', 'permanent']),
-  roundsRemaining: z.number().int().min(0).optional(),
+  roundsRemaining: z.number().int().min(1).optional(),
   saveRequired: z.object({
     ability: z.enum(['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']),
     dc: z.number().int().min(1).max(30),
