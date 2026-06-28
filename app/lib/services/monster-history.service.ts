@@ -1,5 +1,7 @@
+import { monsterHistoryRepository } from '@/app/lib/repositories/monster-history.repository';
+
 /**
- * Monster view history entry
+ * Monster view history entry (public API shape — preserved from original).
  */
 export interface MonsterHistoryEntry {
   monsterName: string;
@@ -8,135 +10,97 @@ export interface MonsterHistoryEntry {
 }
 
 /**
- * Service for tracking monster view history
- * Maintains recently viewed monsters with view counts
+ * Service for tracking monster view history.
+ * Delegates persistence to monsterHistoryRepository (Supabase).
+ * The monster's name is used as its identifier in the `monster_id` column.
+ *
+ * Note: The original localStorage implementation pruned to 50 entries on each
+ * write.  With per-user Supabase rows (unique on owner_id + monster_id) there
+ * is at most one row per unique monster viewed, so pruning is not needed; the
+ * maxEntries limit is still applied client-side when reading.
  */
 class MonsterHistoryServiceClass {
-  private readonly key = 'dnd-monster-history';
-  private readonly maxEntries = 50; // Maximum history entries to keep
+  private readonly maxEntries = 50;
 
-  /**
-   * Get all history entries
-   *
-   * @returns Array of history entries, sorted by most recent first
-   */
-  getAll(): MonsterHistoryEntry[] {
-    try {
-      const data = localStorage.getItem(this.key);
-      const entries: MonsterHistoryEntry[] = data ? JSON.parse(data) : [];
-      return entries.sort((a, b) =>
-        new Date(b.lastViewed).getTime() - new Date(a.lastViewed).getTime()
-      );
-    } catch (error) {
-      console.error('Failed to load monster history:', error);
-      return [];
-    }
+  /** Map a repository entity to the public MonsterHistoryEntry shape. */
+  private toEntry(entity: { monsterId: string; viewCount: number; viewedAt: string }): MonsterHistoryEntry {
+    return {
+      monsterName: entity.monsterId,
+      viewCount: entity.viewCount,
+      lastViewed: entity.viewedAt,
+    };
   }
 
   /**
-   * Save history entries to localStorage
+   * Get all history entries, sorted by most recent first.
    *
-   * @param entries - Array of history entries
+   * @returns Array of history entries
    */
-  private save(entries: MonsterHistoryEntry[]): void {
-    try {
-      localStorage.setItem(this.key, JSON.stringify(entries));
-    } catch (error) {
-      console.error('Failed to save monster history:', error);
-      throw error;
-    }
+  async getAll(): Promise<MonsterHistoryEntry[]> {
+    const entities = await monsterHistoryRepository.list(); // already ordered DESC by viewed_at
+    return entities.map((e) => this.toEntry(e));
   }
 
   /**
-   * Record a monster view
-   * Increments view count and updates timestamp
+   * Record a monster view.
+   * Increments the view count and updates the timestamp for returning viewers;
+   * inserts a new entry for first-time views.
    *
    * @param monsterName - Name of the monster viewed
    */
-  recordView(monsterName: string): void {
-    const entries = this.getAll();
-    const existingIndex = entries.findIndex(e => e.monsterName === monsterName);
-
-    if (existingIndex !== -1) {
-      // Update existing entry
-      entries[existingIndex].viewCount++;
-      entries[existingIndex].lastViewed = new Date().toISOString();
-    } else {
-      // Add new entry
-      entries.push({
-        monsterName,
-        viewCount: 1,
-        lastViewed: new Date().toISOString(),
-      });
-    }
-
-    // Prune to max entries (keep most recently viewed)
-    if (entries.length > this.maxEntries) {
-      const sorted = entries.sort((a, b) =>
-        new Date(b.lastViewed).getTime() - new Date(a.lastViewed).getTime()
-      );
-      this.save(sorted.slice(0, this.maxEntries));
-    } else {
-      this.save(entries);
-    }
+  async recordView(monsterName: string): Promise<void> {
+    return monsterHistoryRepository.upsertView(monsterName);
   }
 
   /**
-   * Get recently viewed monsters (top N)
+   * Get recently viewed monsters (top N).
    *
    * @param limit - Maximum number of entries to return (default: 5)
    * @returns Array of history entries, sorted by most recent first
    */
-  getRecent(limit: number = 5): MonsterHistoryEntry[] {
-    const entries = this.getAll();
-    return entries.slice(0, limit);
+  async getRecent(limit: number = 5): Promise<MonsterHistoryEntry[]> {
+    const entries = await this.getAll();
+    return entries.slice(0, Math.min(limit, this.maxEntries));
   }
 
   /**
-   * Get most frequently viewed monsters (top N)
+   * Get most frequently viewed monsters (top N).
    *
    * @param limit - Maximum number of entries to return (default: 5)
    * @returns Array of history entries, sorted by view count descending
    */
-  getMostViewed(limit: number = 5): MonsterHistoryEntry[] {
-    const entries = this.getAll();
+  async getMostViewed(limit: number = 5): Promise<MonsterHistoryEntry[]> {
+    const entries = await this.getAll();
     return entries
       .sort((a, b) => b.viewCount - a.viewCount)
       .slice(0, limit);
   }
 
   /**
-   * Get view count for a specific monster
+   * Get the view count for a specific monster.
    *
    * @param monsterName - Name of the monster
    * @returns View count, or 0 if never viewed
    */
-  getViewCount(monsterName: string): number {
-    const entries = this.getAll();
-    const entry = entries.find(e => e.monsterName === monsterName);
-    return entry?.viewCount || 0;
+  async getViewCount(monsterName: string): Promise<number> {
+    const entity = await monsterHistoryRepository.findByMonsterId(monsterName);
+    return entity?.viewCount ?? 0;
   }
 
   /**
-   * Clear all history
+   * Clear all history.
    */
-  clear(): void {
-    try {
-      localStorage.removeItem(this.key);
-    } catch (error) {
-      console.error('Failed to clear monster history:', error);
-    }
+  async clear(): Promise<void> {
+    return monsterHistoryRepository.clearAll();
   }
 
   /**
-   * Remove a specific monster from history
+   * Remove a specific monster from history.
    *
    * @param monsterName - Name of the monster to remove
    */
-  remove(monsterName: string): void {
-    const entries = this.getAll();
-    const filtered = entries.filter(e => e.monsterName !== monsterName);
-    this.save(filtered);
+  async remove(monsterName: string): Promise<void> {
+    return monsterHistoryRepository.removeByMonsterId(monsterName);
   }
 }
 

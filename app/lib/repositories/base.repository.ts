@@ -112,4 +112,25 @@ export class BaseRepository<T extends { id: string }, R extends Record<string, u
       throw new RepositoryError(`Failed to delete from ${this.tableName} id=${id}: ${error.message}`);
     }
   }
+
+  /**
+   * Return all rows where `column` equals `value`.
+   * Protected helper for campaign-scoped subclass repositories that need to
+   * filter by a single equality predicate (e.g. campaign_id).
+   */
+  protected async listBy(column: string, value: string): Promise<T[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select("*")
+      .eq(column, value);
+
+    if (error) {
+      throw new RepositoryError(
+        `Failed to list ${this.tableName} where ${column}=${value}: ${error.message}`
+      );
+    }
+
+    return (data as R[]).map(this.mapper.fromRow);
+  }
 }
