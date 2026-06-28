@@ -1,13 +1,10 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
+import { updateSession } from "./app/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  // Skip Supabase auth for local development
-  // When you're ready to add auth, uncomment the following:
-  // import { updateSession } from "./app/lib/supabase/middleware";
-  // return await updateSession(request);
-
-  // For now, just pass through all requests
-  return NextResponse.next();
+  // Refresh the Supabase session and gate protected routes.
+  // No-ops (passes through) when Supabase env vars are not configured.
+  return await updateSession(request);
 }
 
 export const config = {

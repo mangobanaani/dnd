@@ -5,6 +5,12 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/app/lib/supabase/client";
+
+function getNextPath(): string {
+  if (typeof window === "undefined") return "/dashboard";
+  return new URLSearchParams(window.location.search).get("next") || "/dashboard";
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,30 +21,44 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("Authentication is disabled in local development mode. Set up Supabase to enable login.");
-    setIsLoading(false);
+    setError("");
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      router.push(getNextPath());
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOAuthLogin = async (provider: "google" | "facebook") => {
-    setError("Authentication is disabled in local development mode. Set up Supabase to enable OAuth.");
-    setIsLoading(false);
+    setError("");
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(getNextPath())}` },
+      });
+      if (error) setError(error.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "OAuth sign in failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#0a0a0f] via-[#0a0a0f] to-[#131318]">
       <div className="w-full max-w-md">
-        {/* Local Dev Notice */}
-        <div className="mb-6 p-4 rounded-lg bg-[#fbbf24]/10 border border-[#fbbf24]/50 text-center">
-          <p className="text-[#fbbf24] text-sm mb-2 font-semibold">
-            🔧 Local Development Mode
-          </p>
-          <p className="text-[#a1a1aa] text-xs">
-            Authentication is disabled. Explore the app without login at{" "}
-            <Link href="/" className="text-[#8b5cf6] hover:underline">
-              homepage
-            </Link>
-          </p>
-        </div>
 
         {/* Logo/Title */}
         <div className="text-center mb-8">
