@@ -27,6 +27,7 @@ import {
 import { Character } from '@/app/types/character';
 import { QuestBoard } from '@/app/components/campaign/quest-board';
 import { NPCRelationshipGraph } from '@/app/components/campaign/npc-relationship-graph';
+import { safeParseLocalStorage } from '@/app/lib/utils/json-utils';
 
 type TabType = 'overview' | 'notes' | 'sessions' | 'npcs' | 'locations' | 'quests' | 'quest-board' | 'npc-graph';
 
@@ -106,37 +107,19 @@ export default function CampaignDetailPage({
     }
 
     // Load campaign-specific data
-    const notesStored = localStorage.getItem(`dnd-campaign-notes-${id}`);
-    if (notesStored) setNotes(JSON.parse(notesStored));
-
-    const sessionsStored = localStorage.getItem(`dnd-campaign-sessions-${id}`);
-    if (sessionsStored) setSessions(JSON.parse(sessionsStored));
-
-    const npcsStored = localStorage.getItem(`dnd-campaign-npcs-${id}`);
-    if (npcsStored) setNPCs(JSON.parse(npcsStored));
-
-    const locationsStored = localStorage.getItem(`dnd-campaign-locations-${id}`);
-    if (locationsStored) setLocations(JSON.parse(locationsStored));
-
-    const questsStored = localStorage.getItem(`dnd-campaign-quests-${id}`);
-    if (questsStored) setQuests(JSON.parse(questsStored));
+    setNotes(safeParseLocalStorage<CampaignNote[]>(`dnd-campaign-notes-${id}`, []));
+    setSessions(safeParseLocalStorage<CampaignSession[]>(`dnd-campaign-sessions-${id}`, []));
+    setNPCs(safeParseLocalStorage<CampaignNPC[]>(`dnd-campaign-npcs-${id}`, []));
+    setLocations(safeParseLocalStorage<CampaignLocation[]>(`dnd-campaign-locations-${id}`, []));
+    setQuests(safeParseLocalStorage<CampaignQuest[]>(`dnd-campaign-quests-${id}`, []));
   }, [id]);
 
   const loadCampaignData = () => {
-    const notesStored = localStorage.getItem(`dnd-campaign-notes-${id}`);
-    if (notesStored) setNotes(JSON.parse(notesStored));
-
-    const sessionsStored = localStorage.getItem(`dnd-campaign-sessions-${id}`);
-    if (sessionsStored) setSessions(JSON.parse(sessionsStored));
-
-    const npcsStored = localStorage.getItem(`dnd-campaign-npcs-${id}`);
-    if (npcsStored) setNPCs(JSON.parse(npcsStored));
-
-    const locationsStored = localStorage.getItem(`dnd-campaign-locations-${id}`);
-    if (locationsStored) setLocations(JSON.parse(locationsStored));
-
-    const questsStored = localStorage.getItem(`dnd-campaign-quests-${id}`);
-    if (questsStored) setQuests(JSON.parse(questsStored));
+    setNotes(safeParseLocalStorage<CampaignNote[]>(`dnd-campaign-notes-${id}`, []));
+    setSessions(safeParseLocalStorage<CampaignSession[]>(`dnd-campaign-sessions-${id}`, []));
+    setNPCs(safeParseLocalStorage<CampaignNPC[]>(`dnd-campaign-npcs-${id}`, []));
+    setLocations(safeParseLocalStorage<CampaignLocation[]>(`dnd-campaign-locations-${id}`, []));
+    setQuests(safeParseLocalStorage<CampaignQuest[]>(`dnd-campaign-quests-${id}`, []));
   };
 
   const saveCampaignData = (
@@ -761,9 +744,14 @@ export default function CampaignDetailPage({
     // Update in localStorage
     const stored = localStorage.getItem('dnd-campaigns');
     if (stored) {
-      const campaigns: Campaign[] = JSON.parse(stored);
-      const updated = campaigns.map(c => c.id === id ? updatedCampaign : c);
-      localStorage.setItem('dnd-campaigns', JSON.stringify(updated));
+      try {
+        const campaigns: Campaign[] = JSON.parse(stored);
+        const updated = campaigns.map(c => c.id === id ? updatedCampaign : c);
+        localStorage.setItem('dnd-campaigns', JSON.stringify(updated));
+      } catch {
+        addToast('Failed to update campaign data', 'error');
+        return;
+      }
     }
 
     setShowEditCampaignModal(false);
@@ -777,10 +765,15 @@ export default function CampaignDetailPage({
     // Load all characters from localStorage
     const charsStored = localStorage.getItem('dnd-characters');
     if (charsStored) {
-      const allChars: Character[] = JSON.parse(charsStored);
-      // Filter out characters already in this campaign
-      const available = allChars.filter(char => !campaign?.characterIds.includes(char.id));
-      setAvailableCharacters(available);
+      try {
+        const allChars: Character[] = JSON.parse(charsStored);
+        // Filter out characters already in this campaign
+        const available = allChars.filter(char => !campaign?.characterIds.includes(char.id));
+        setAvailableCharacters(available);
+      } catch {
+        addToast('Failed to load characters', 'error');
+        return;
+      }
     }
     setShowAddCharacterModal(true);
   };
@@ -791,7 +784,13 @@ export default function CampaignDetailPage({
     const charsStored = localStorage.getItem('dnd-characters');
     if (!charsStored) return;
 
-    const allCharacters: Character[] = JSON.parse(charsStored);
+    let allCharacters: Character[];
+    try {
+      allCharacters = JSON.parse(charsStored);
+    } catch {
+      addToast('Failed to load characters', 'error');
+      return;
+    }
     const character = allCharacters.find(c => c.id === selectedCharacterId);
     if (!character) return;
 
@@ -815,9 +814,14 @@ export default function CampaignDetailPage({
     // Save campaign
     const campaignsStored = localStorage.getItem('dnd-campaigns');
     if (campaignsStored) {
-      const campaigns: Campaign[] = JSON.parse(campaignsStored);
-      const updatedCampaigns = campaigns.map(c => c.id === id ? updatedCampaign : c);
-      localStorage.setItem('dnd-campaigns', JSON.stringify(updatedCampaigns));
+      try {
+        const campaigns: Campaign[] = JSON.parse(campaignsStored);
+        const updatedCampaigns = campaigns.map(c => c.id === id ? updatedCampaign : c);
+        localStorage.setItem('dnd-campaigns', JSON.stringify(updatedCampaigns));
+      } catch {
+        addToast('Failed to update campaign data', 'error');
+        return;
+      }
     }
 
     // Save character
@@ -849,7 +853,13 @@ export default function CampaignDetailPage({
     const charsStored = localStorage.getItem('dnd-characters');
     if (!charsStored) return;
 
-    const allCharacters: Character[] = JSON.parse(charsStored);
+    let allCharacters: Character[];
+    try {
+      allCharacters = JSON.parse(charsStored);
+    } catch {
+      addToast('Failed to load characters', 'error');
+      return;
+    }
     const character = allCharacters.find((c) => c.id === characterId);
     if (!character) return;
 
@@ -874,9 +884,14 @@ export default function CampaignDetailPage({
     // Save campaign
     const campaignsStored = localStorage.getItem('dnd-campaigns');
     if (campaignsStored) {
-      const campaigns: Campaign[] = JSON.parse(campaignsStored);
-      const updatedCampaigns = campaigns.map(c => c.id === id ? updatedCampaign : c);
-      localStorage.setItem('dnd-campaigns', JSON.stringify(updatedCampaigns));
+      try {
+        const campaigns: Campaign[] = JSON.parse(campaignsStored);
+        const updatedCampaigns = campaigns.map(c => c.id === id ? updatedCampaign : c);
+        localStorage.setItem('dnd-campaigns', JSON.stringify(updatedCampaigns));
+      } catch {
+        addToast('Failed to update campaign data', 'error');
+        return;
+      }
     }
 
     // Save character

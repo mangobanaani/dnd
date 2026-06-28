@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { List } from 'react-window';
 import { Monster } from '@/app/types/monster';
 import { MonsterCard } from './monster-card';
@@ -63,7 +63,8 @@ export function VirtualMonsterGrid({
   }, [rowCount, rowHeight]);
 
   // Row renderer - each row contains multiple columns
-  const Row = ({ index, style, ariaAttributes }: any) => {
+  // Wrapped in useCallback so react-window does not remount all rows on each parent render
+  const Row = useCallback(({ index, style, ariaAttributes }: any) => {
     const startIndex = index * columnCount;
     const rowMonsters = monsters.slice(startIndex, startIndex + columnCount);
 
@@ -88,7 +89,7 @@ export function VirtualMonsterGrid({
           ))}
       </div>
     );
-  };
+  }, [monsters, columnCount, columnWidth, onSelect, onAddToEncounter]);
 
   // Show message if no monsters
   if (monsters.length === 0) {

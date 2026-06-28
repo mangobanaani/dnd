@@ -3,6 +3,8 @@
  * Handles backup and restore of all application data
  */
 
+import { migrateLocalStorage } from '@/app/lib/migrations/effects-migration';
+
 export interface ExportData {
   version: number;
   timestamp: string;
@@ -19,6 +21,13 @@ const DATA_KEYS = [
   'dnd-campaigns',
   'dnd-characters',
   'dnd-sessions',
+  'dnd-custom-monsters',
+  'dnd-monster-favorites',
+  'dnd-monster-history',
+  'dnd-locations',
+  'dnd-npcs',
+  'dnd-quests',
+  'dnd-saved-encounters',
 ] as const;
 
 /**
@@ -100,17 +109,44 @@ export function importData(exportData: ExportData): {
     }
 
     let imported = 0;
+    const skipped: string[] = [];
+
+    // Build an allowlist of accepted keys: static DATA_KEYS plus dynamic
+    // per-campaign key patterns.
+    const staticAllowlist = new Set<string>(DATA_KEYS as unknown as string[]);
+
+    const isAllowedKey = (key: string): boolean => {
+      if (staticAllowlist.has(key)) return true;
+      // Dynamic per-campaign keys: dnd-campaign-{notes|sessions|npcs|locations|quests}-<id>
+      return /^dnd-campaign-(notes|sessions|npcs|locations|quests)-[^/]+$/.test(key);
+    };
 
     Object.entries(exportData.data).forEach(([key, value]) => {
-      if (value !== null) {
-        localStorage.setItem(key, value);
-        imported++;
+      if (value === null) return;
+
+      if (!isAllowedKey(key)) {
+        skipped.push(key);
+        return;
       }
+
+      // Confirm the value is valid JSON before storing it.
+      try {
+        JSON.parse(value);
+      } catch {
+        skipped.push(key);
+        return;
+      }
+
+      localStorage.setItem(key, value);
+      imported++;
     });
+
+    // Upgrade any legacy data that was just restored.
+    migrateLocalStorage();
 
     return {
       success: true,
-      message: `Successfully imported ${imported} data items`,
+      message: `Successfully imported ${imported} data items${skipped.length > 0 ? ` (${skipped.length} skipped)` : ''}`,
       imported,
     };
   } catch (error) {

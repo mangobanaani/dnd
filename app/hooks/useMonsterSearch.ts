@@ -118,7 +118,7 @@ export function useMonsterSearch(monsters: Monster[], favoriteNames: string[] = 
     });
   }, [monsters, debouncedName, filters, favoriteNames]);
 
-  const updateFilter = <K extends keyof MonsterFilters>(
+  const updateFilter = useCallback(<K extends keyof MonsterFilters>(
     key: K,
     value: MonsterFilters[K]
   ) => {
@@ -126,7 +126,7 @@ export function useMonsterSearch(monsters: Monster[], favoriteNames: string[] = 
       ...prev,
       [key]: value,
     }));
-  };
+  }, []);
 
   // Sorted monsters
   const sortedMonsters = useMemo(() => {
@@ -167,7 +167,7 @@ export function useMonsterSearch(monsters: Monster[], favoriteNames: string[] = 
     return sorted;
   }, [filteredMonsters, sort]);
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setFilters({
       name: '',
       size: [],
@@ -184,7 +184,7 @@ export function useMonsterSearch(monsters: Monster[], favoriteNames: string[] = 
     });
     setNameInput('');
     setDebouncedName('');
-  };
+  }, []);
 
   const updateSort = useCallback((field: MonsterSort['field']) => {
     setSort((prev) => ({

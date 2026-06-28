@@ -52,7 +52,8 @@ export function canManageCampaign(campaign: Campaign, userId: string): boolean {
 export function canApplyEffects(
   campaign: Campaign,
   userId: string,
-  characterId: string
+  characterId: string,
+  characters: Array<{ id: string; playerId: string }>
 ): boolean {
   // DM can apply effects to anyone
   if (isDM(campaign, userId)) {
@@ -61,13 +62,8 @@ export function canApplyEffects(
 
   // Players can only apply effects to their own characters
   if (isPlayer(campaign, userId)) {
-    // Character ownership check
-    // For now, assume character index matches player index
-    // In production, you'd check character.userId === userId
-    const playerIndex = campaign.playerIds.indexOf(userId);
-    if (playerIndex !== -1 && campaign.characterIds[playerIndex] === characterId) {
-      return true;
-    }
+    const character = characters.find(c => c.id === characterId);
+    return character?.playerId === userId;
   }
 
   return false;

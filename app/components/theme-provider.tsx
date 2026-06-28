@@ -28,16 +28,15 @@ export function ThemeProvider({
   storageKey = "dnd-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [theme, setTheme] = useState<Theme>(
+    () =>
+      (typeof window !== "undefined" &&
+        (localStorage.getItem(storageKey) as Theme)) ||
+      defaultTheme
+  );
 
   useEffect(() => {
     const root = window.document.documentElement;
-
-    // Load theme from localStorage
-    const storedTheme = localStorage.getItem(storageKey) as Theme;
-    if (storedTheme) {
-      setTheme(storedTheme);
-    }
 
     // Apply theme
     root.classList.remove("light", "dark");
@@ -53,7 +52,7 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
-  }, [theme, storageKey]);
+  }, [theme]);
 
   const value = {
     theme,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext, ReactNode } from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -21,25 +21,42 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const timeoutRefs = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const addToast = (message: string, type: ToastType = 'info', duration: number = 3000) => {
+  useEffect(() => {
+    const refs = timeoutRefs.current;
+    return () => {
+      refs.forEach((id) => clearTimeout(id));
+      refs.clear();
+    };
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    const timeoutId = timeoutRefs.current.get(id);
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+      timeoutRefs.current.delete(id);
+    }
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  }, []);
+
+  const addToast = useCallback((message: string, type: ToastType = 'info', duration: number = 3000) => {
     const id = crypto.randomUUID();
     const toast: Toast = { id, message, type, duration };
     setToasts((prev) => [...prev, toast]);
 
     if (duration > 0) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         removeToast(id);
       }, duration);
+      timeoutRefs.current.set(id, timeoutId);
     }
-  };
+  }, [removeToast]);
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
+  const contextValue = useMemo(() => ({ toasts, addToast, removeToast }), [toasts, addToast, removeToast]);
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </ToastContext.Provider>

@@ -80,14 +80,26 @@ export class CombatRoundService {
     }
 
     // Skip inactive combatants
-    while (!combatants[nextIndex]?.isActive && nextIndex < combatants.length) {
-      nextIndex++;
-      if (nextIndex >= combatants.length) {
-        nextIndex = 0;
-        if (!roundIncremented) {
-          nextRound++;
-          roundIncremented = true;
-          combatants = this.tickAllEffects(combatants);
+    const hasActive = combatants.some(c => c.isActive);
+    if (!hasActive) {
+      // All combatants inactive — keep current index rather than looping forever
+      nextIndex = state.currentTurnIndex;
+    } else {
+      let iterations = 0;
+      while (nextIndex < combatants.length && !combatants[nextIndex].isActive) {
+        iterations++;
+        if (iterations >= combatants.length) {
+          nextIndex = state.currentTurnIndex;
+          break;
+        }
+        nextIndex++;
+        if (nextIndex >= combatants.length) {
+          nextIndex = 0;
+          if (!roundIncremented) {
+            nextRound++;
+            roundIncremented = true;
+            combatants = this.tickAllEffects(combatants);
+          }
         }
       }
     }
@@ -167,7 +179,7 @@ export class CombatRoundService {
 
     // Apply damage from each effect
     for (const effect of currentCombatant.effects) {
-      if (effect.mechanics.damagePerRound) {
+      if (effect.mechanics.damagePerRound && (!effect.mechanics.damagePerRound.timing || effect.mechanics.damagePerRound.timing === 'start')) {
         const { amount, type } = effect.mechanics.damagePerRound;
 
         // Apply damage (temp HP first, then real HP)
@@ -215,7 +227,9 @@ export class CombatRoundService {
    * Check if the current turn is the last in the round
    */
   isRoundComplete(state: CombatState): boolean {
-    return state.currentTurnIndex === state.combatants.length - 1;
+    const lastActiveIndex = state.combatants.reduce<number>((last, c, idx) => (c.isActive ? idx : last), -1);
+    if (lastActiveIndex === -1) return true;
+    return state.currentTurnIndex === lastActiveIndex;
   }
 
   /**

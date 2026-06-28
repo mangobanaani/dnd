@@ -30,6 +30,7 @@ class MonsterFavoritesServiceClass {
       localStorage.setItem(this.key, JSON.stringify(favorites));
     } catch (error) {
       console.error('Failed to save favorites:', error);
+      throw error;
     }
   }
 

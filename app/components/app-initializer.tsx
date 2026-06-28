@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { migrateLocalStorage } from '@/app/lib/migrations/effects-migration';
 import { SeedDataService } from '@/app/lib/services/seed-data.service';
 
 /**
@@ -10,6 +11,12 @@ export function AppInitializer() {
   useEffect(() => {
     const initApp = async () => {
       if (typeof window === 'undefined') return;
+
+      try {
+        migrateLocalStorage();
+      } catch (error) {
+        console.error('Failed to migrate localStorage:', error);
+      }
 
       // Check if app has been initialized before
       const hasInitialized = localStorage.getItem('app:initialized');

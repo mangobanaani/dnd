@@ -43,6 +43,7 @@ class MonsterHistoryServiceClass {
       localStorage.setItem(this.key, JSON.stringify(entries));
     } catch (error) {
       console.error('Failed to save monster history:', error);
+      throw error;
     }
   }
 

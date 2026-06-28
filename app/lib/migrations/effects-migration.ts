@@ -20,7 +20,7 @@ export const CURRENT_VERSION = 2;
 export interface MigrationData {
   effects?: Effect[] | null;
   exhaustionLevel?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -59,16 +59,16 @@ export function getDataVersion(data: MigrationData): number {
 export function migrateCharacter(character: MigrationData): Character {
   // If already has effects, return as-is
   if (character.effects && Array.isArray(character.effects)) {
-    return character as Character;
+    return character as unknown as Character;
   }
 
   // Add effects and exhaustionLevel fields
   return {
-    ...(character as any),
+    ...(character as Record<string, unknown>),
     effects: [],
     exhaustionLevel: character.exhaustionLevel ?? 0,
     concentration: character.concentration,
-  } as Character;
+  } as unknown as Character;
 }
 
 /**
@@ -77,11 +77,11 @@ export function migrateCharacter(character: MigrationData): Character {
 export function migrateCombatant(combatant: MigrationData): Combatant {
   // If already has effects, return as-is
   if (combatant.effects && Array.isArray(combatant.effects)) {
-    return combatant as Combatant;
+    return combatant as unknown as Combatant;
   }
 
   // Migrate HP field names from old to new
-  const migratedCombatant: any = { ...combatant };
+  const migratedCombatant: Record<string, unknown> = { ...combatant };
 
   if ('maxHp' in migratedCombatant) {
     migratedCombatant.maxHitPoints = migratedCombatant.maxHp;
@@ -104,7 +104,7 @@ export function migrateCombatant(combatant: MigrationData): Combatant {
     effects: [],
     exhaustionLevel: migratedCombatant.exhaustionLevel ?? 0,
     concentration: migratedCombatant.concentration,
-  } as Combatant;
+  } as unknown as Combatant;
 }
 
 /**
