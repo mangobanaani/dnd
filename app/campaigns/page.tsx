@@ -10,6 +10,7 @@ import { useToast } from '@/app/components/ui/toast';
 import { CampaignCardSkeleton } from '@/app/components/ui/skeleton';
 import { CampaignCard } from '@/app/components/campaigns/campaign-card';
 import { Campaign } from '@/app/types/campaign';
+import { campaignRepository } from '@/app/lib/repositories/campaign.repository';
 import { Map } from 'lucide-react';
 
 export default function CampaignsPage() {
@@ -21,16 +22,14 @@ export default function CampaignsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const stored = localStorage.getItem('dnd-campaigns');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setCampaigns(parsed);
-      } catch (error) {
-        // Failed to load campaigns
-      }
-    }
-    setLoading(false);
+    campaignRepository
+      .list()
+      .then((data) => setCampaigns(data))
+      .catch((err) => {
+        console.error('Failed to load campaigns:', err);
+        setCampaigns([]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const deleteCampaign = async (id: string) => {
@@ -43,21 +42,33 @@ export default function CampaignsPage() {
     });
 
     if (confirmed) {
-      const updated = campaigns.filter((c) => c.id !== id);
-      setCampaigns(updated);
-      localStorage.setItem('dnd-campaigns', JSON.stringify(updated));
-      addToast(`${campaign?.name || 'Campaign'} deleted`, 'success');
+      try {
+        await campaignRepository.remove(id);
+        setCampaigns((prev) => prev.filter((c) => c.id !== id));
+        addToast(`${campaign?.name || 'Campaign'} deleted`, 'success');
+      } catch (err) {
+        console.error('Failed to delete campaign:', err);
+        addToast('Failed to delete campaign', 'error');
+      }
     }
   };
 
-  const setActiveCampaign = (id: string) => {
+  const setActiveCampaign = async (id: string) => {
     // Set all campaigns to non-active, then set the selected one to active
     const updated = campaigns.map(c => ({
       ...c,
-      status: c.id === id ? 'active' as const : c.status === 'active' ? 'planning' as const : c.status
+      status: c.id === id ? 'active' as const : c.status === 'active' ? 'planning' as const : c.status,
     }));
-    setCampaigns(updated);
-    localStorage.setItem('dnd-campaigns', JSON.stringify(updated));
+
+    // Persist only the campaigns whose status changed
+    const changed = updated.filter((c, i) => c.status !== campaigns[i]?.status);
+    try {
+      await Promise.all(changed.map((c) => campaignRepository.update(c.id, c)));
+      setCampaigns(updated);
+    } catch (err) {
+      console.error('Failed to set active campaign:', err);
+      addToast('Failed to update campaign status', 'error');
+    }
   };
 
   const filteredCampaigns = campaigns.filter((campaign) =>

@@ -1,113 +1,81 @@
+import { monsterFavoriteRepository } from '@/app/lib/repositories/monster-favorite.repository';
+
 /**
- * Service for managing monster favorites
- * Stores monster names (not full objects) to keep storage lightweight
+ * Service for managing monster favorites.
+ * Delegates persistence to monsterFavoriteRepository (Supabase).
+ * The monster's name is used as its stable identifier in the `monster_id` column.
  */
 class MonsterFavoritesServiceClass {
-  private readonly key = 'dnd-monster-favorites';
-
   /**
-   * Get all favorited monster names
+   * Get all favorited monster names.
    *
    * @returns Array of monster names
    */
-  getAll(): string[] {
-    try {
-      const data = localStorage.getItem(this.key);
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error('Failed to load favorites:', error);
-      return [];
-    }
+  async getAll(): Promise<string[]> {
+    return monsterFavoriteRepository.listMonsterIds();
   }
 
   /**
-   * Save favorites to localStorage
-   *
-   * @param favorites - Array of monster names
-   */
-  private save(favorites: string[]): void {
-    try {
-      localStorage.setItem(this.key, JSON.stringify(favorites));
-    } catch (error) {
-      console.error('Failed to save favorites:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Toggle favorite status for a monster
+   * Toggle favorite status for a monster.
    *
    * @param monsterName - Name of the monster
    * @returns True if monster is now favorited, false if unfavorited
    */
-  toggle(monsterName: string): boolean {
-    const favorites = this.getAll();
-    const index = favorites.indexOf(monsterName);
+  async toggle(monsterName: string): Promise<boolean> {
+    const already = await monsterFavoriteRepository.existsByMonsterId(monsterName);
 
-    if (index === -1) {
-      favorites.push(monsterName);
-      this.save(favorites);
-      return true;
-    } else {
-      favorites.splice(index, 1);
-      this.save(favorites);
+    if (already) {
+      await monsterFavoriteRepository.removeByMonsterId(monsterName);
       return false;
+    } else {
+      await monsterFavoriteRepository.addMonster(monsterName);
+      return true;
     }
   }
 
   /**
-   * Add a monster to favorites
+   * Add a monster to favorites.
    *
    * @param monsterName - Name of the monster
    */
-  add(monsterName: string): void {
-    const favorites = this.getAll();
-    if (!favorites.includes(monsterName)) {
-      favorites.push(monsterName);
-      this.save(favorites);
-    }
+  async add(monsterName: string): Promise<void> {
+    return monsterFavoriteRepository.addMonster(monsterName);
   }
 
   /**
-   * Remove a monster from favorites
+   * Remove a monster from favorites.
    *
    * @param monsterName - Name of the monster
    */
-  remove(monsterName: string): void {
-    const favorites = this.getAll();
-    const filtered = favorites.filter(name => name !== monsterName);
-    this.save(filtered);
+  async remove(monsterName: string): Promise<void> {
+    return monsterFavoriteRepository.removeByMonsterId(monsterName);
   }
 
   /**
-   * Check if a monster is favorited
+   * Check if a monster is favorited.
    *
    * @param monsterName - Name of the monster
    * @returns True if favorited, false otherwise
    */
-  isFavorite(monsterName: string): boolean {
-    const favorites = this.getAll();
-    return favorites.includes(monsterName);
+  async isFavorite(monsterName: string): Promise<boolean> {
+    return monsterFavoriteRepository.existsByMonsterId(monsterName);
   }
 
   /**
-   * Get count of favorited monsters
+   * Get count of favorited monsters.
    *
    * @returns Number of favorites
    */
-  getCount(): number {
-    return this.getAll().length;
+  async getCount(): Promise<number> {
+    const ids = await monsterFavoriteRepository.listMonsterIds();
+    return ids.length;
   }
 
   /**
-   * Clear all favorites
+   * Clear all favorites.
    */
-  clear(): void {
-    try {
-      localStorage.removeItem(this.key);
-    } catch (error) {
-      console.error('Failed to clear favorites:', error);
-    }
+  async clear(): Promise<void> {
+    return monsterFavoriteRepository.clearAll();
   }
 }
 

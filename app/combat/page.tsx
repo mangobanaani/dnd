@@ -42,6 +42,8 @@ import { Character, calculateModifier } from '@/app/types/character';
 import { Monster } from '@/app/types/monster';
 import { getXPThreshold } from '@/app/lib/xp-thresholds';
 import { safeParseJSON } from '@/app/lib/utils/json-utils';
+import { campaignRepository } from '@/app/lib/repositories/campaign.repository';
+import { characterRepository } from '@/app/lib/repositories/character.repository';
 
 export default function CombatTrackerPage() {
   const { addToast } = useToast();
@@ -87,18 +89,15 @@ export default function CombatTrackerPage() {
   );
   const currentCombatant = sortedCombatants[currentTurn] ?? null;
 
-  // Load campaigns and monsters from localStorage
+  // Load campaigns from Supabase and monsters from localStorage
   useEffect(() => {
-    const storedCampaigns = localStorage.getItem('dnd-campaigns');
-    if (storedCampaigns) {
-      const result = safeParseJSON<Campaign[]>(storedCampaigns, []);
-      if (result.success) {
-        setCampaigns(result.data);
-      } else {
-        console.error('Failed to load campaigns:', result.error);
+    campaignRepository
+      .list()
+      .then((data) => setCampaigns(data))
+      .catch((err) => {
+        console.error('Failed to load campaigns:', err);
         addToast('Failed to load campaigns. Data may be corrupted.', 'error');
-      }
-    }
+      });
 
     const storedMonsters = localStorage.getItem('dnd-monsters');
     if (storedMonsters) {
@@ -183,24 +182,18 @@ export default function CombatTrackerPage() {
     }
   }, []);
 
-  const loadPartyFromCampaign = (campaignId: string) => {
+  const loadPartyFromCampaign = async (campaignId: string) => {
     const campaign = campaigns.find(c => c.id === campaignId);
     if (!campaign) return;
 
-    const storedCharacters = localStorage.getItem('dnd-characters');
-    if (!storedCharacters) return;
-
-    const result = safeParseJSON<Character[]>(storedCharacters, []);
-    if (!result.success) {
-      console.error('Failed to load characters:', result.error);
+    let partyCharacters: Character[];
+    try {
+      partyCharacters = await characterRepository.listForCampaign(campaignId);
+    } catch (err) {
+      console.error('Failed to load characters:', err);
       addToast('Failed to load characters. Data may be corrupted.', 'error');
       return;
     }
-
-    const allCharacters = result.data;
-    const partyCharacters = allCharacters.filter(char =>
-      campaign.characterIds.includes(char.id)
-    );
 
     // Convert characters to combatants
     const newCombatants: Combatant[] = partyCharacters.map(char => {

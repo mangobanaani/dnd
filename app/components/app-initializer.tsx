@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { migrateLocalStorage } from '@/app/lib/migrations/effects-migration';
 import { SeedDataService } from '@/app/lib/services/seed-data.service';
+import { importLocalStorageToSupabase } from '@/app/lib/migrations/localstorage-import';
 
 /**
  * Component to initialize the app with default data on first run
@@ -16,6 +17,13 @@ export function AppInitializer() {
         migrateLocalStorage();
       } catch (error) {
         console.error('Failed to migrate localStorage:', error);
+      }
+
+      // One-time localStorage → Supabase import (runs once per signed-in user).
+      try {
+        await importLocalStorageToSupabase();
+      } catch (error) {
+        console.error('Failed to import localStorage to Supabase:', error);
       }
 
       // Check if app has been initialized before

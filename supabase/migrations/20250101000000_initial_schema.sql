@@ -39,27 +39,7 @@ create table public.campaigns (
 
 alter table public.campaigns enable row level security;
 
--- Campaigns policies
-create policy "Campaign members can view campaigns" on public.campaigns
-  for select using (
-    auth.uid() = dm_id
-    or exists (
-      select 1 from public.campaign_members
-      where campaign_id = campaigns.id
-      and user_id = auth.uid()
-    )
-  );
-
-create policy "Only DM can create campaigns" on public.campaigns
-  for insert with check (auth.uid() = dm_id);
-
-create policy "Only DM can update their campaigns" on public.campaigns
-  for update using (auth.uid() = dm_id);
-
-create policy "Only DM can delete their campaigns" on public.campaigns
-  for delete using (auth.uid() = dm_id);
-
--- Campaign Members table
+-- Campaign Members table (must exist before the campaign policies that reference it)
 create table public.campaign_members (
   id uuid default uuid_generate_v4() primary key,
   campaign_id uuid references public.campaigns(id) on delete cascade not null,
@@ -71,31 +51,49 @@ create table public.campaign_members (
 
 alter table public.campaign_members enable row level security;
 
+-- SECURITY DEFINER helpers to break RLS mutual recursion between campaigns and
+-- campaign_members (and the campaign-scoped child tables). They run as the owner
+-- and bypass RLS on the tables they read. search_path is locked for safety.
+create or replace function public.is_campaign_dm(cid uuid)
+returns boolean language sql security definer stable set search_path = '' as $$
+  select exists (
+    select 1 from public.campaigns where id = cid and dm_id = auth.uid()
+  );
+$$;
+
+create or replace function public.is_campaign_member(cid uuid)
+returns boolean language sql security definer stable set search_path = '' as $$
+  select exists (
+    select 1 from public.campaign_members where campaign_id = cid and user_id = auth.uid()
+  );
+$$;
+
+-- Campaigns policies
+create policy "Campaign members can view campaigns" on public.campaigns
+  for select using (
+    auth.uid() = dm_id or public.is_campaign_member(id)
+  );
+
+create policy "Only DM can create campaigns" on public.campaigns
+  for insert with check (auth.uid() = dm_id);
+
+create policy "Only DM can update their campaigns" on public.campaigns
+  for update using (auth.uid() = dm_id);
+
+create policy "Only DM can delete their campaigns" on public.campaigns
+  for delete using (auth.uid() = dm_id);
+
 -- Campaign members policies
 create policy "Campaign members can view themselves" on public.campaign_members
   for select using (
-    user_id = auth.uid()
-    or exists (
-      select 1 from public.campaigns
-      where id = campaign_id and dm_id = auth.uid()
-    )
+    user_id = auth.uid() or public.is_campaign_dm(campaign_id)
   );
 
 create policy "DM can add members" on public.campaign_members
-  for insert with check (
-    exists (
-      select 1 from public.campaigns
-      where id = campaign_id and dm_id = auth.uid()
-    )
-  );
+  for insert with check (public.is_campaign_dm(campaign_id));
 
 create policy "DM can remove members" on public.campaign_members
-  for delete using (
-    exists (
-      select 1 from public.campaigns
-      where id = campaign_id and dm_id = auth.uid()
-    )
-  );
+  for delete using (public.is_campaign_dm(campaign_id));
 
 -- Characters table
 create table public.characters (
@@ -144,33 +142,18 @@ create policy "Players can view their own characters" on public.characters
   for select using (player_id = auth.uid());
 
 create policy "DM can view campaign characters" on public.characters
-  for select using (
-    exists (
-      select 1 from public.campaigns
-      where id = campaign_id and dm_id = auth.uid()
-    )
-  );
+  for select using (public.is_campaign_dm(campaign_id));
 
 create policy "Players can create characters in joined campaigns" on public.characters
   for insert with check (
-    player_id = auth.uid()
-    and exists (
-      select 1 from public.campaign_members
-      where campaign_id = characters.campaign_id
-      and user_id = auth.uid()
-    )
+    player_id = auth.uid() and public.is_campaign_member(campaign_id)
   );
 
 create policy "Players can update their own characters" on public.characters
   for update using (player_id = auth.uid());
 
 create policy "DM can update campaign characters" on public.characters
-  for update using (
-    exists (
-      select 1 from public.campaigns
-      where id = campaign_id and dm_id = auth.uid()
-    )
-  );
+  for update using (public.is_campaign_dm(campaign_id));
 
 create policy "Players can delete their own characters" on public.characters
   for delete using (player_id = auth.uid());
@@ -192,26 +175,11 @@ alter table public.sessions enable row level security;
 -- Sessions policies (same as campaigns)
 create policy "Campaign members can view sessions" on public.sessions
   for select using (
-    exists (
-      select 1 from public.campaigns c
-      where c.id = campaign_id
-      and (
-        c.dm_id = auth.uid()
-        or exists (
-          select 1 from public.campaign_members cm
-          where cm.campaign_id = c.id and cm.user_id = auth.uid()
-        )
-      )
-    )
+    public.is_campaign_dm(campaign_id) or public.is_campaign_member(campaign_id)
   );
 
 create policy "Only DM can manage sessions" on public.sessions
-  for all using (
-    exists (
-      select 1 from public.campaigns
-      where id = campaign_id and dm_id = auth.uid()
-    )
-  );
+  for all using (public.is_campaign_dm(campaign_id));
 
 -- Function to automatically create profile on signup
 create or replace function public.handle_new_user()

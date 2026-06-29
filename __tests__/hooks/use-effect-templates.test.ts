@@ -188,7 +188,7 @@ describe('useEffectTemplates', () => {
 
       expect(concentration.length).toBeGreaterThan(0);
       concentration.forEach((template) => {
-        expect(template.mechanics.requiresConcentration).toBe(true);
+        expect(template.mechanics!.requiresConcentration).toBe(true);
       });
     });
 
@@ -199,7 +199,7 @@ describe('useEffectTemplates', () => {
 
       expect(nonConcentration.length).toBeGreaterThan(0);
       nonConcentration.forEach((template) => {
-        expect(template.mechanics.requiresConcentration).not.toBe(true);
+        expect(template.mechanics!.requiresConcentration).not.toBe(true);
       });
     });
 

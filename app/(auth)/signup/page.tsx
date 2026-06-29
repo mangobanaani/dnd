@@ -5,41 +5,71 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/app/lib/supabase/client";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("Authentication is disabled in local development mode. Set up Supabase to enable sign up.");
-    setIsLoading(false);
+    setError("");
+    setMessage("");
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { display_name: displayName || undefined },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      // When email confirmation is enabled, no session is returned yet.
+      if (data.session) {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        setMessage("Account created. Check your email to confirm your address, then sign in.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign up failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOAuthSignup = async (provider: "google" | "facebook") => {
-    setError("Authentication is disabled in local development mode. Set up Supabase to enable OAuth.");
-    setIsLoading(false);
+    setError("");
+    setMessage("");
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) setError(error.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "OAuth sign up failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#0a0a0f] via-[#0a0a0f] to-[#131318]">
       <div className="w-full max-w-md">
-        {/* Local Dev Notice */}
-        <div className="mb-6 p-4 rounded-lg bg-[#fbbf24]/10 border border-[#fbbf24]/50 text-center">
-          <p className="text-[#fbbf24] text-sm mb-2 font-semibold">
-            🔧 Local Development Mode
-          </p>
-          <p className="text-[#a1a1aa] text-xs">
-            Authentication is disabled. Explore the app without login at{" "}
-            <Link href="/" className="text-[#8b5cf6] hover:underline">
-              homepage
-            </Link>
-          </p>
-        </div>
 
         {/* Logo/Title */}
         <div className="text-center mb-8">
@@ -54,6 +84,12 @@ export default function SignupPage() {
           {error && (
             <div className="p-4 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/50 text-[#ef4444] text-sm">
               {error}
+            </div>
+          )}
+
+          {message && (
+            <div className="p-4 rounded-lg bg-[#22c55e]/10 border border-[#22c55e]/50 text-[#22c55e] text-sm">
+              {message}
             </div>
           )}
 

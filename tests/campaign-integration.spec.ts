@@ -740,6 +740,8 @@ test.describe('Character Journey Through Campaign', () => {
       currency: { copper: 0, silver: 0, electrum: 0, gold: 10, platinum: 0 },
       carriedWeight: 50,
       maxCarryWeight: 240,
+      effects: [],
+      exhaustionLevel: 0,
       campaignId: 'campaign-1',
       playerId: 'player-1',
       createdAt: '2024-01-01T00:00:00.000Z',

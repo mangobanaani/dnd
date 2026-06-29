@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { campaignRepository } from '@/app/lib/repositories/campaign.repository';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import {
@@ -42,7 +43,7 @@ export default function CreateCampaignPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validate()) {
@@ -51,7 +52,8 @@ export default function CreateCampaignPage() {
 
     const campaign = {
       id: crypto.randomUUID(),
-      ...createDefaultCampaign('local-dm'),
+      // dmId will be overwritten by campaignRepository.add() with the real user id
+      ...createDefaultCampaign(''),
       name,
       description,
       setting,
@@ -63,16 +65,13 @@ export default function CreateCampaignPage() {
       isPublic,
     };
 
-    // Save to localStorage
-    const existingCampaigns = JSON.parse(
-      localStorage.getItem('dnd-campaigns') || '[]'
-    );
-    localStorage.setItem(
-      'dnd-campaigns',
-      JSON.stringify([...existingCampaigns, campaign])
-    );
-
-    router.push('/campaigns');
+    try {
+      await campaignRepository.add(campaign);
+      router.push('/campaigns');
+    } catch (err) {
+      console.error('Failed to create campaign:', err);
+      setErrors({ submit: 'Failed to save campaign. Please try again.' });
+    }
   };
 
   return (
@@ -301,9 +300,14 @@ export default function CreateCampaignPage() {
             <Link href="/campaigns">
               <Button variant="secondary">Cancel</Button>
             </Link>
-            <Button type="submit" variant="primary">
-              Create Campaign
-            </Button>
+            <div className="flex flex-col items-end gap-2">
+              {errors.submit && (
+                <p className="text-red-400 text-sm">{errors.submit}</p>
+              )}
+              <Button type="submit" variant="primary">
+                Create Campaign
+              </Button>
+            </div>
           </div>
         </form>
       </div>

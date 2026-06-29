@@ -34,8 +34,9 @@ test.describe('Character Data Migration & Backward Compatibility', () => {
         features: ['Second Wind', 'Action Surge'],
         traits: [],
         equipment: ['Longsword', 'Shield', 'Chain Mail'], // Legacy equipment array
-        // NOTE: inventory field is MISSING (simulating old data)
-        // NOTE: currency field is MISSING (simulating old data)
+        // NOTE: inventory and currency are undefined (simulating old data without these fields)
+        inventory: undefined as unknown[] | undefined,
+        currency: undefined as { copper: number; silver: number; electrum: number; gold: number; platinum: number } | undefined,
         carriedWeight: 0,
         maxCarryWeight: 240,
         playerId: 'player-1',
@@ -188,8 +189,11 @@ test.describe('Character Data Migration & Backward Compatibility', () => {
         equipment: ['Mace', 'Shield', 'Chain Mail'],
         inventory: [],
         currency: {
-          gold: 15, // Only gold defined
-          // Missing: copper, silver, electrum, platinum
+          gold: 15, // Only gold defined; others undefined to simulate partial/legacy data
+          copper: undefined as number | undefined,
+          silver: undefined as number | undefined,
+          electrum: undefined as number | undefined,
+          platinum: undefined as number | undefined,
         },
         carriedWeight: 0,
         maxCarryWeight: 210,
@@ -310,7 +314,7 @@ test.describe('Character Data Migration & Backward Compatibility', () => {
     });
 
     test('should validate currency object structure', () => {
-      const validCurrency = {
+      const validCurrency: Record<string, number> = {
         copper: 100,
         silver: 50,
         electrum: 10,

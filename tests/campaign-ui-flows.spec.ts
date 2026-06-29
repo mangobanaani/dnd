@@ -373,12 +373,18 @@ test.describe('Quest Management UI Flow', () => {
   });
 
   test('should change quest status through workflow', () => {
-    let quest = {
+    type QuestStatus = 'available' | 'active' | 'completed' | 'failed';
+    let quest: {
+      id: string; title: string; status: QuestStatus; objectives: unknown[];
+      priority: 'low' | 'medium' | 'high' | 'critical'; description: string;
+      rewards: string[]; notes: string; isPublic: boolean; campaignId: string;
+      createdAt: string; updatedAt: string;
+    } = {
       id: 'quest-3',
       title: 'Retrieve Artifact',
-      status: 'available' as const,
+      status: 'available',
       objectives: [],
-      priority: 'medium' as const,
+      priority: 'medium',
       description: '',
       rewards: [],
       notes: '',
@@ -476,7 +482,7 @@ test.describe('Quest Management UI Flow', () => {
       { id: '4', priority: 'medium', title: 'Q4', status: 'active' as const, description: '', objectives: [], rewards: [], notes: '', isPublic: true, campaignId: 'c1', createdAt: '', updatedAt: '' },
     ];
 
-    const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+    const priorityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
     const sorted = [...quests].sort((a, b) =>
       priorityOrder[a.priority] - priorityOrder[b.priority]
     );
@@ -556,11 +562,15 @@ test.describe('Integrated Campaign Workflows', () => {
   });
 
   test('should handle quest completion and NPC relationship changes', () => {
-    let npc = {
+    const npc: {
+      id: string; name: string; relationship: string; status: string;
+      description: string; notes: string; isPublic: boolean; campaignId: string;
+      createdAt: string; updatedAt: string;
+    } = {
       id: 'npc-1',
       name: 'Town Elder',
-      relationship: 'neutral' as const,
-      status: 'alive' as const,
+      relationship: 'neutral',
+      status: 'alive',
       description: '',
       notes: '',
       isPublic: true,
@@ -569,12 +579,18 @@ test.describe('Integrated Campaign Workflows', () => {
       updatedAt: '',
     };
 
-    let quest = {
+    const quest: {
+      id: string; title: string; giver: string; status: string;
+      priority: string; description: string;
+      objectives: { id: string; description: string; completed: boolean; optional: boolean }[];
+      rewards: string[]; notes: string; isPublic: boolean; campaignId: string;
+      createdAt: string; updatedAt: string;
+    } = {
       id: 'quest-1',
       title: 'Save the Town',
       giver: 'Town Elder',
-      status: 'active' as const,
-      priority: 'high' as const,
+      status: 'active',
+      priority: 'high',
       description: '',
       objectives: [{ id: '1', description: 'Defeat bandits', completed: false, optional: false }],
       rewards: [],

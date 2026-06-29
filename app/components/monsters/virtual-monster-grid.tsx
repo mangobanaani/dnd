@@ -9,12 +9,16 @@ interface VirtualMonsterGridProps {
   monsters: Monster[];
   onSelect?: (monster: Monster) => void;
   onAddToEncounter?: (monster: Monster) => void;
+  isFavorite?: (name: string) => boolean;
+  onToggleFavorite?: (monster: Monster) => void;
 }
 
 export function VirtualMonsterGrid({
   monsters,
   onSelect,
   onAddToEncounter,
+  isFavorite,
+  onToggleFavorite,
 }: VirtualMonsterGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -79,6 +83,8 @@ export function VirtualMonsterGrid({
               monster={monster}
               onSelect={onSelect}
               onAddToEncounter={onAddToEncounter}
+              isFavorite={isFavorite ? isFavorite(monster.name) : false}
+              onToggleFavorite={onToggleFavorite}
             />
           </div>
         ))}
@@ -89,7 +95,7 @@ export function VirtualMonsterGrid({
           ))}
       </div>
     );
-  }, [monsters, columnCount, columnWidth, onSelect, onAddToEncounter]);
+  }, [monsters, columnCount, columnWidth, onSelect, onAddToEncounter, isFavorite, onToggleFavorite]);
 
   // Show message if no monsters
   if (monsters.length === 0) {

@@ -20,11 +20,21 @@ describe('Campaign Role Helpers', () => {
     name: 'Test Campaign',
     description: '',
     setting: '',
+    startDate: '2024-01-01T00:00:00.000Z',
+    status: 'active',
+    edition: '5e',
+    homebrew: false,
+    difficultyLevel: 'normal',
     dmId: 'user-dm',
     playerIds: ['user-player1', 'user-player2'],
     characterIds: ['char-1', 'char-2'],
+    sessionCount: 0,
+    totalSessions: 0,
+    currentLevel: 1,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
+    tags: [],
+    isPublic: false,
   };
 
   describe('getUserRole', () => {

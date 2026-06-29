@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use, useMemo, useCallback } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/app/components/ui/button';
@@ -8,7 +8,7 @@ import { Input } from '@/app/components/ui/input';
 import { InventoryItemModal } from '@/app/components/character/inventory-item-modal';
 import { useToast } from '@/app/components/ui/toast';
 import { useConfirm } from '@/app/components/ui/confirm-dialog';
-import { StorageService } from '@/app/lib/services/storage.service';
+import { characterRepository } from '@/app/lib/repositories/character.repository';
 import {
   Character,
   AbilityScores,
@@ -39,48 +39,48 @@ export default function CharacterSheetPage({
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [itemFilter, setItemFilter] = useState<'all' | 'equipped' | 'magical'>('all');
 
-  // Initialize storage service
-  const characterStorage = useMemo(() => new StorageService<Character>('dnd-characters'), []);
-
   useEffect(() => {
-    try {
-      const found = characterStorage.getById(id);
-      if (found) {
-        // Migrate old characters without inventory field
-        const migrated = {
-          ...found,
-          inventory: found.inventory || [],
-          currency: found.currency || {
-            copper: 0,
-            silver: 0,
-            electrum: 0,
-            gold: 0,
-            platinum: 0,
-          },
-        };
-        setCharacter(migrated);
-        setHpInput(migrated.currentHitPoints.toString());
+    async function load() {
+      try {
+        const found = await characterRepository.getById(id);
+        if (found) {
+          // Migrate old characters without inventory field
+          const migrated = {
+            ...found,
+            inventory: found.inventory || [],
+            currency: found.currency || {
+              copper: 0,
+              silver: 0,
+              electrum: 0,
+              gold: 0,
+              platinum: 0,
+            },
+          };
+          setCharacter(migrated);
+          setHpInput(migrated.currentHitPoints.toString());
 
-        // Save migrated character back if needed
-        if (!found.inventory) {
-          characterStorage.update(id, migrated);
+          // Save migrated character back if needed
+          if (!found.inventory) {
+            await characterRepository.update(id, migrated);
+          }
         }
+      } catch (error) {
+        console.error('Failed to load character:', error);
+        addToast('Failed to load character', 'error');
       }
-    } catch (error) {
-      console.error('Failed to load character:', error);
-      addToast('Failed to load character', 'error');
     }
-  }, [id, characterStorage, addToast]);
+    load();
+  }, [id, addToast]);
 
-  const saveCharacter = useCallback((updated: Character) => {
+  const saveCharacter = useCallback(async (updated: Character) => {
     try {
-      characterStorage.update(updated.id, updated);
+      await characterRepository.update(updated.id, updated);
       setCharacter(updated);
     } catch (error) {
       console.error('Failed to save character:', error);
       addToast('Failed to save character', 'error');
     }
-  }, [characterStorage, addToast]);
+  }, [addToast]);
 
   const updateHP = () => {
     if (!character) return;
@@ -321,13 +321,13 @@ export default function CharacterSheetPage({
               });
 
               if (confirmed) {
-                const stored = localStorage.getItem('dnd-characters');
-                if (stored) {
-                  const characters: Character[] = JSON.parse(stored);
-                  const updated = characters.filter((c) => c.id !== id);
-                  localStorage.setItem('dnd-characters', JSON.stringify(updated));
+                try {
+                  await characterRepository.remove(id);
                   addToast(`${character?.name || 'Character'} deleted`, 'success');
                   router.push('/characters');
+                } catch (error) {
+                  console.error('Failed to delete character:', error);
+                  addToast('Failed to delete character', 'error');
                 }
               }
             }}
