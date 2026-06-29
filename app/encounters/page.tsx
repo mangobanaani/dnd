@@ -13,6 +13,7 @@ import { Button } from '@/app/components/ui/button';
 import { useToast } from '@/app/components/ui/toast';
 import { SavedEncounter } from '@/app/types/campaign';
 import { Character } from '@/app/types/character';
+import { encounterRepository } from '@/app/lib/repositories/encounter.repository';
 
 export default function EncountersPage() {
   const router = useRouter();
@@ -99,15 +100,14 @@ export default function EncountersPage() {
         setLoading(false);
       });
 
-    // Load saved encounters
-    const stored = localStorage.getItem('dnd-saved-encounters');
-    if (stored) {
-      try {
-        setSavedEncounters(JSON.parse(stored));
-      } catch (error) {
-        console.error('Failed to parse saved encounters from localStorage:', error);
-      }
-    }
+    // Load saved encounters from Supabase
+    encounterRepository
+      .list()
+      .then((data) => setSavedEncounters(data))
+      .catch((err) => {
+        console.error('Failed to load saved encounters:', err);
+        setSavedEncounters([]);
+      });
   }, []);
 
   // Generate AI description
@@ -194,7 +194,10 @@ export default function EncountersPage() {
 
     const updated = [saved, ...savedEncounters];
     setSavedEncounters(updated);
-    localStorage.setItem('dnd-saved-encounters', JSON.stringify(updated));
+    encounterRepository.add(saved).catch((err) => {
+      console.error('Failed to save encounter:', err);
+      addToast('Failed to save encounter', 'error');
+    });
 
     // Reset form
     setEncounterName('');
@@ -244,11 +247,16 @@ export default function EncountersPage() {
   };
 
   // Delete saved encounter
-  const deleteSavedEncounter = (id: string) => {
+  const deleteSavedEncounter = async (id: string) => {
     if (confirm('Delete this saved encounter?')) {
       const updated = savedEncounters.filter(e => e.id !== id);
       setSavedEncounters(updated);
-      localStorage.setItem('dnd-saved-encounters', JSON.stringify(updated));
+      try {
+        await encounterRepository.remove(id);
+      } catch (err) {
+        console.error('Failed to delete encounter:', err);
+        addToast('Failed to delete encounter', 'error');
+      }
     }
   };
 

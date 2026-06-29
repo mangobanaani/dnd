@@ -209,6 +209,8 @@ test.describe('Advantage and Disadvantage', () => {
 test.describe('Critical Hits and Fails', () => {
   test('should detect critical hit (natural 20)', () => {
     const roll: DiceRoll = {
+      id: 'roll-1',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [20],
@@ -223,6 +225,8 @@ test.describe('Critical Hits and Fails', () => {
 
   test('should detect critical fail (natural 1)', () => {
     const roll: DiceRoll = {
+      id: 'roll-2',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [1],
@@ -237,6 +241,8 @@ test.describe('Critical Hits and Fails', () => {
 
   test('should not detect critical hit on non-20 d20 roll', () => {
     const roll: DiceRoll = {
+      id: 'roll-3',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [19],
@@ -251,6 +257,8 @@ test.describe('Critical Hits and Fails', () => {
 
   test('should not detect critical fail on non-1 d20 roll', () => {
     const roll: DiceRoll = {
+      id: 'roll-4',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [2],
@@ -265,6 +273,8 @@ test.describe('Critical Hits and Fails', () => {
 
   test('critical detection should only apply to d20 rolls', () => {
     const d6Max: DiceRoll = {
+      id: 'roll-5',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd6',
       quantity: 1,
       rolls: [6],
@@ -279,6 +289,8 @@ test.describe('Critical Hits and Fails', () => {
 
   test('modifier should not affect critical hit detection', () => {
     const roll: DiceRoll = {
+      id: 'roll-6',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [20],
@@ -322,6 +334,8 @@ test.describe('Dice Formula Formatting', () => {
 test.describe('Roll Result Colors', () => {
   test('should return green color for critical hit', () => {
     const roll: DiceRoll = {
+      id: 'roll-7',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [20],
@@ -336,6 +350,8 @@ test.describe('Roll Result Colors', () => {
 
   test('should return red color for critical fail', () => {
     const roll: DiceRoll = {
+      id: 'roll-8',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [1],
@@ -350,6 +366,8 @@ test.describe('Roll Result Colors', () => {
 
   test('should return default color for normal roll', () => {
     const roll: DiceRoll = {
+      id: 'roll-9',
+      timestamp: '2024-01-01T00:00:00.000Z',
       diceType: 'd20',
       quantity: 1,
       rolls: [15],

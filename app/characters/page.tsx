@@ -9,8 +9,8 @@ import { useToast } from '@/app/components/ui/toast';
 import { useConfirm } from '@/app/components/ui/confirm-dialog';
 import { CharacterCardSkeleton } from '@/app/components/ui/skeleton';
 import { CharacterCard } from '@/app/components/characters/character-card';
-import { StorageService } from '@/app/lib/services/storage.service';
 import { Character } from '@/app/types/character';
+import { characterRepository } from '@/app/lib/repositories/character.repository';
 import { ScrollText } from 'lucide-react';
 
 export default function CharactersPage() {
@@ -21,19 +21,21 @@ export default function CharactersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const characterStorage = new StorageService<Character>('dnd-characters');
-
   // Load characters on mount only
   useEffect(() => {
-    try {
-      const stored = characterStorage.getAll();
-      setCharacters(stored);
-    } catch (error) {
-      console.error('Failed to load characters:', error);
-      addToast('Failed to load characters', 'error');
-    } finally {
-      setLoading(false);
+    async function load() {
+      try {
+        const data = await characterRepository.list();
+        setCharacters(data);
+      } catch (error) {
+        console.error('Failed to load characters:', error);
+        addToast('Failed to load characters', 'error');
+        setCharacters([]);
+      } finally {
+        setLoading(false);
+      }
     }
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -48,7 +50,7 @@ export default function CharactersPage() {
 
     if (confirmed) {
       try {
-        characterStorage.remove(id);
+        await characterRepository.remove(id);
         setCharacters(characters.filter((c) => c.id !== id));
         addToast((character?.name || 'Character') + ' deleted', 'success');
       } catch (error) {

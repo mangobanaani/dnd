@@ -215,9 +215,9 @@ describe('Condition Management', () => {
 
     it('should handle mixed duration types', () => {
       combatant.conditions = [
-        { name: 'Poisoned', duration: 2, source: 'Dart' },
-        { name: 'Stunned', duration: -1, source: 'Ability' },
-        { name: 'Blinded', duration: 1, source: 'Spell' },
+        { name: 'Poisoned', description: 'Disadvantage on attacks', duration: 2, source: 'Dart' },
+        { name: 'Stunned', description: 'Incapacitated, cannot move', duration: -1, source: 'Ability' },
+        { name: 'Blinded', description: 'Cannot see', duration: 1, source: 'Spell' },
       ];
 
       const result = decrementConditionDurations(combatant);
@@ -231,9 +231,9 @@ describe('Condition Management', () => {
 
     it('should remove multiple conditions that reach 0', () => {
       combatant.conditions = [
-        { name: 'Poisoned', duration: 1, source: 'A' },
-        { name: 'Blinded', duration: 1, source: 'B' },
-        { name: 'Stunned', duration: 2, source: 'C' },
+        { name: 'Poisoned', description: 'Disadvantage on attacks', duration: 1, source: 'A' },
+        { name: 'Blinded', description: 'Cannot see', duration: 1, source: 'B' },
+        { name: 'Stunned', description: 'Incapacitated, cannot move', duration: 2, source: 'C' },
       ];
 
       const result = decrementConditionDurations(combatant);
@@ -252,8 +252,8 @@ describe('Condition Management', () => {
 
     it('should clear all conditions if all reach 0', () => {
       combatant.conditions = [
-        { name: 'Poisoned', duration: 1, source: 'A' },
-        { name: 'Blinded', duration: 1, source: 'B' },
+        { name: 'Poisoned', description: 'Disadvantage on attacks', duration: 1, source: 'A' },
+        { name: 'Blinded', description: 'Cannot see', duration: 1, source: 'B' },
       ];
 
       const result = decrementConditionDurations(combatant);
@@ -262,7 +262,7 @@ describe('Condition Management', () => {
     });
 
     it('should not mutate original combatant', () => {
-      combatant.conditions = [{ name: 'Poisoned', duration: 3, source: 'Dart' }];
+      combatant.conditions = [{ name: 'Poisoned', description: 'Disadvantage on attacks', duration: 3, source: 'Dart' }];
       const originalDuration = combatant.conditions[0].duration;
 
       decrementConditionDurations(combatant);
@@ -271,7 +271,7 @@ describe('Condition Management', () => {
     });
 
     it('should not mutate original conditions array', () => {
-      const originalConditions = [{ name: 'Poisoned', duration: 3, source: 'Dart' }];
+      const originalConditions = [{ name: 'Poisoned', description: 'Disadvantage on attacks', duration: 3, source: 'Dart' }];
       combatant.conditions = originalConditions;
 
       decrementConditionDurations(combatant);
@@ -302,7 +302,7 @@ describe('Condition Management', () => {
     });
 
     it('should handle adding condition after decrementing', () => {
-      combatant.conditions = [{ name: 'Poisoned', duration: 1, source: 'A' }];
+      combatant.conditions = [{ name: 'Poisoned', description: 'Disadvantage on attacks', duration: 1, source: 'A' }];
       let result = decrementConditionDurations(combatant);
 
       result = addCondition(result, blindedCondition);
@@ -317,6 +317,7 @@ describe('Condition Management', () => {
 
       const newPoison: Condition = {
         name: 'Poisoned',
+        description: 'Disadvantage on attacks',
         duration: 5,
         source: 'New Source',
       };

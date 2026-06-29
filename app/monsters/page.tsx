@@ -1,19 +1,33 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Monster } from '@/app/types/monster';
 import { useMonsterSearch } from '@/app/hooks/useMonsterSearch';
+import { useMonsterFavorites } from '@/app/hooks/useMonsterFavorites';
+import { useMonsterHistory } from '@/app/hooks/useMonsterHistory';
 import { MonsterDetail } from '@/app/components/monsters/monster-detail';
 import { VirtualMonsterGrid } from '@/app/components/monsters/virtual-monster-grid';
 import { MonsterCardSkeleton } from '@/app/components/monsters/monster-card-skeleton';
 import { Modal } from '@/app/components/ui/modal';
 import { Input } from '@/app/components/ui/input';
 import { Button } from '@/app/components/ui/button';
+import { Star } from 'lucide-react';
 
 export default function MonstersPage() {
   const [monsters, setMonsters] = useState<Monster[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonster, setSelectedMonster] = useState<Monster | null>(null);
+
+  // Supabase-backed favorites
+  const {
+    favoriteNames,
+    loading: favoritesLoading,
+    isFavorite,
+    toggleFavorite,
+  } = useMonsterFavorites();
+
+  // View history — records are fire-and-forget; recentHistory surfaces the sidebar affordance
+  const { recentHistory, recordView } = useMonsterHistory();
 
   const {
     monsters: filteredMonsters,
@@ -21,21 +35,42 @@ export default function MonstersPage() {
     updateFilter,
     resetFilters,
     stats,
-  } = useMonsterSearch(monsters);
+  } = useMonsterSearch(monsters, favoriteNames);
+
+  // Quick name-lookup map so "recently viewed" entries can open the detail panel
+  const monsterByName = useMemo(
+    () => new Map(monsters.map((m) => [m.name, m])),
+    [monsters]
+  );
 
   useEffect(() => {
     // Load monster data
     fetch('/data/monsters.json')
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: Monster[]) => {
         setMonsters(data);
         setLoading(false);
       })
       .catch(() => {
-        // Failed to load monsters
         setLoading(false);
       });
   }, []);
+
+  const handleSelectMonster = useCallback(
+    (monster: Monster) => {
+      setSelectedMonster(monster);
+      recordView(monster.name);
+    },
+    [recordView]
+  );
+
+  const handleSelectFromHistory = useCallback(
+    (name: string) => {
+      const monster = monsterByName.get(name);
+      if (monster) handleSelectMonster(monster);
+    },
+    [monsterByName, handleSelectMonster]
+  );
 
   const sizes = ['Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan'];
   const types = [
@@ -79,8 +114,6 @@ export default function MonstersPage() {
       : [...current, value];
     updateFilter(key, updated);
   };
-
-  // Don't block rendering while loading - show skeletons instead
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-4 md:p-8">
@@ -278,8 +311,57 @@ export default function MonstersPage() {
                   >
                     ✨ Spellcaster
                   </button>
+
+                  {/* Favorites-only toggle */}
+                  <button
+                    onClick={() =>
+                      updateFilter(
+                        'favoriteOnly',
+                        filters.favoriteOnly === true ? undefined : true
+                      )
+                    }
+                    disabled={favoritesLoading}
+                    className={`w-full text-sm px-3 py-2 rounded transition-all text-left flex items-center gap-2 ${
+                      filters.favoriteOnly === true
+                        ? 'bg-[#fbbf24]/20 text-[#fbbf24] border border-[#fbbf24]/50 font-medium'
+                        : 'bg-[#27272a] text-[#a1a1aa] hover:bg-[#3f3f46]'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    <Star
+                      size={13}
+                      fill={filters.favoriteOnly === true ? 'currentColor' : 'none'}
+                      strokeWidth={2}
+                    />
+                    Favorites Only
+                    {!favoritesLoading && favoriteNames.length > 0 && (
+                      <span className="ml-auto text-xs opacity-70">
+                        {favoriteNames.length}
+                      </span>
+                    )}
+                  </button>
                 </div>
               </div>
+
+              {/* Recently Viewed */}
+              {recentHistory.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-[#fafafa] mb-2">
+                    Recently Viewed
+                  </label>
+                  <div className="space-y-1">
+                    {recentHistory.map((entry) => (
+                      <button
+                        key={entry.monsterName}
+                        onClick={() => handleSelectFromHistory(entry.monsterName)}
+                        className="w-full text-left text-xs px-3 py-1.5 rounded bg-[#27272a] text-[#a1a1aa] hover:bg-[#3f3f46] hover:text-[#fafafa] transition-colors truncate"
+                        title={entry.monsterName}
+                      >
+                        {entry.monsterName}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -307,7 +389,9 @@ export default function MonstersPage() {
             ) : (
               <VirtualMonsterGrid
                 monsters={filteredMonsters}
-                onSelect={setSelectedMonster}
+                onSelect={handleSelectMonster}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
               />
             )}
           </div>
@@ -320,7 +404,11 @@ export default function MonstersPage() {
           size="xl"
         >
           {selectedMonster && (
-            <MonsterDetail monster={selectedMonster} />
+            <MonsterDetail
+              monster={selectedMonster}
+              isFavorite={isFavorite(selectedMonster.name)}
+              onToggleFavorite={toggleFavorite}
+            />
           )}
         </Modal>
       </div>

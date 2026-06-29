@@ -10,13 +10,21 @@ describe('SessionDetailModal', () => {
     name: 'Test Campaign',
     description: 'A test campaign',
     setting: 'Forgotten Realms',
+    startDate: '2024-01-01T00:00:00.000Z',
     status: 'active',
     edition: '5e',
+    homebrew: false,
+    difficultyLevel: 'normal',
+    dmId: 'dm-1',
     playerIds: ['player-1', 'player-2'],
     characterIds: ['char-1', 'char-2'],
     sessionCount: 5,
+    totalSessions: 5,
+    currentLevel: 1,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-15T00:00:00.000Z',
+    tags: [],
+    isPublic: false,
   };
 
   const mockSession: CampaignSession = {

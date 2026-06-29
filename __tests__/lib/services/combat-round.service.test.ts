@@ -444,7 +444,7 @@ describe('CombatRoundService', () => {
 
       const current = service.getCurrentCombatant(state);
 
-      expect(current.name).toBe('Wizard');
+      expect(current!.name).toBe('Wizard');
     });
 
     it('should handle invalid index', () => {

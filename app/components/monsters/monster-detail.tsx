@@ -2,13 +2,21 @@
 
 import { Monster, crToXP } from '@/app/types/monster';
 import { Button } from '@/app/components/ui/button';
+import { Star } from 'lucide-react';
 
 interface MonsterDetailProps {
   monster: Monster;
   onAddToEncounter?: (monster: Monster) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (monster: Monster) => void;
 }
 
-export function MonsterDetail({ monster, onAddToEncounter }: MonsterDetailProps) {
+export function MonsterDetail({
+  monster,
+  onAddToEncounter,
+  isFavorite = false,
+  onToggleFavorite,
+}: MonsterDetailProps) {
   const getTypeColor = (type: string) => {
     const typeColors: Record<string, string> = {
       'Aberration': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
@@ -43,9 +51,34 @@ export function MonsterDetail({ monster, onAddToEncounter }: MonsterDetailProps)
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl font-bold text-[#fafafa] mb-2">
-              {monster.name}
-            </h1>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold text-[#fafafa]">
+                {monster.name}
+              </h1>
+              {/* Favorite toggle */}
+              {onToggleFavorite && (
+                <button
+                  aria-label={
+                    isFavorite
+                      ? `Remove ${monster.name} from favorites`
+                      : `Add ${monster.name} to favorites`
+                  }
+                  aria-pressed={isFavorite}
+                  onClick={() => onToggleFavorite(monster)}
+                  className={`p-2 rounded-lg border transition-all flex-shrink-0 ${
+                    isFavorite
+                      ? 'border-[#fbbf24]/50 bg-[#fbbf24]/10 text-[#fbbf24] hover:bg-[#fbbf24]/20'
+                      : 'border-[#27272a] bg-transparent text-[#52525b] hover:border-[#fbbf24]/30 hover:text-[#fbbf24]'
+                  }`}
+                >
+                  <Star
+                    size={18}
+                    fill={isFavorite ? 'currentColor' : 'none'}
+                    strokeWidth={2}
+                  />
+                </button>
+              )}
+            </div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-sm px-3 py-1 rounded border ${getTypeColor(monster.type)}`}>
                 {monster.type}

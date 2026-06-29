@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
+import { useToast } from '@/app/components/ui/toast';
 import {
+  Character,
   DND_CLASSES,
   DND_RACES,
   DND_ALIGNMENTS,
@@ -13,12 +15,15 @@ import {
   Skill,
   calculateModifier,
   formatModifier,
+  calculateMaxCarryWeight,
 } from '@/app/types/character';
+import { characterRepository } from '@/app/lib/repositories/character.repository';
 
 type WizardStep = 'basic' | 'abilities' | 'skills' | 'equipment' | 'personality' | 'review';
 
 export default function CreateCharacterPage() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [currentStep, setCurrentStep] = useState<WizardStep>('basic');
 
   // Character state
@@ -162,9 +167,8 @@ export default function CreateCharacterPage() {
     rollAbilityScores();
   };
 
-  const handleSave = () => {
-    // In a real app, this would save to localStorage or database
-    const character = {
+  const handleSave = async () => {
+    const character: Character = {
       id: crypto.randomUUID(),
       name,
       race,
@@ -186,29 +190,27 @@ export default function CreateCharacterPage() {
       features: [],
       traits: [],
       equipment: selectedEquipment,
+      inventory: [],
       currency: { copper: 0, silver: 0, electrum: 0, gold: startingGold, platinum: 0 },
+      carriedWeight: 0,
+      maxCarryWeight: calculateMaxCarryWeight(abilityScores.strength),
+      effects: [],
+      exhaustionLevel: 0,
       hitDice: [{ total: 1, current: 1, die: 'd10' }],
-      playerId: 'local-player',
+      // playerId is stamped by characterRepository.add() from the authenticated user
+      playerId: '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       notes: `Appearance: ${appearance}\n\nPersonality: ${personalityTraits}\n\nIdeals: ${ideals}\n\nBonds: ${bonds}\n\nFlaws: ${flaws}`,
     };
 
-    // Save to localStorage for now
-    let existingCharacters: object[] = [];
     try {
-      existingCharacters = JSON.parse(
-        localStorage.getItem('dnd-characters') || '[]'
-      );
-    } catch {
-      existingCharacters = [];
+      await characterRepository.add(character);
+      router.push('/characters');
+    } catch (error) {
+      console.error('Failed to create character:', error);
+      addToast('Failed to create character. Please try again.', 'error');
     }
-    localStorage.setItem(
-      'dnd-characters',
-      JSON.stringify([...existingCharacters, character])
-    );
-
-    router.push('/characters');
   };
 
   const renderStepContent = () => {

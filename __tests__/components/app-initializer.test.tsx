@@ -90,7 +90,7 @@ describe('AppInitializer', () => {
     it('logs in development mode', async () => {
       // Set NODE_ENV to development
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
+      (process.env as { [key: string]: string | undefined }).NODE_ENV = 'development';
 
       localStorageGetItemSpy.mockReturnValue(null);
 
@@ -120,13 +120,13 @@ describe('AppInitializer', () => {
       expect(consoleLogSpy).toHaveBeenCalled();
 
       // Restore NODE_ENV
-      process.env.NODE_ENV = originalEnv;
+      (process.env as { [key: string]: string | undefined }).NODE_ENV = originalEnv;
     });
 
     it('does not log in production mode', async () => {
       // Set NODE_ENV to production
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+      (process.env as { [key: string]: string | undefined }).NODE_ENV = 'production';
 
       localStorageGetItemSpy.mockReturnValue(null);
 
@@ -156,7 +156,7 @@ describe('AppInitializer', () => {
       expect(consoleLogSpy).not.toHaveBeenCalled();
 
       // Restore NODE_ENV
-      process.env.NODE_ENV = originalEnv;
+      (process.env as { [key: string]: string | undefined }).NODE_ENV = originalEnv;
     });
   });
 

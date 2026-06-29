@@ -1,12 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { Character, SpellSlot, HitDice } from '@/app/types/character';
+import { Character } from '@/app/types/character';
+
+// Local type aliases matching the current Character type shapes
+type SpellSlot = { level: number; total: number; used: number };
+type HitDice = { die: string; total: number; current: number };
 
 // Mock character for testing
 const createMockCharacter = (overrides?: Partial<Character>): Character => ({
   id: 'test-char-1',
-  userId: 'test-user',
+  playerId: 'test-user',
   name: 'Test Wizard',
-  class: 'Wizard',
+  classes: [{ name: 'Wizard', level: 5, hitDie: 'd6' }],
   level: 5,
   race: 'Human',
   background: 'Sage',
@@ -19,7 +23,7 @@ const createMockCharacter = (overrides?: Partial<Character>): Character => ({
   currentHitPoints: 28,
   temporaryHitPoints: 0,
   hitDice: [
-    { type: 'd6', total: 5, current: 5 },
+    { die: 'd6', total: 5, current: 5 },
   ],
   abilityScores: {
     strength: 8,
@@ -29,48 +33,25 @@ const createMockCharacter = (overrides?: Partial<Character>): Character => ({
     wisdom: 12,
     charisma: 10,
   },
-  savingThrows: {
-    strength: -1,
-    dexterity: 2,
-    constitution: 1,
-    intelligence: 5,
-    wisdom: 3,
-    charisma: 0,
-  },
-  skills: {
-    acrobatics: 2,
-    animalHandling: 1,
-    arcana: 5,
-    athletics: -1,
-    deception: 0,
-    history: 5,
-    insight: 1,
-    intimidation: 0,
-    investigation: 5,
-    medicine: 1,
-    nature: 3,
-    perception: 1,
-    performance: 0,
-    persuasion: 0,
-    religion: 3,
-    sleightOfHand: 2,
-    stealth: 2,
-    survival: 1,
-  },
+  savingThrows: ['intelligence', 'wisdom'],
+  skills: [],
   proficiencyBonus: 3,
-  inspiration: false,
   equipment: ['Spellbook', 'Component pouch', 'Quarterstaff'],
   inventory: [],
   features: ['Spellcasting', 'Arcane Recovery'],
-  spells: ['Magic Missile', 'Shield', 'Detect Magic', 'Fireball', 'Counterspell'],
+  traits: [],
+  currency: { copper: 0, silver: 0, electrum: 0, gold: 0, platinum: 0 },
+  carriedWeight: 0,
+  maxCarryWeight: 150,
+  effects: [],
+  exhaustionLevel: 0,
   spellSlots: [
     { level: 1, total: 4, used: 0 },
     { level: 2, total: 3, used: 0 },
     { level: 3, total: 2, used: 0 },
   ],
   spellcastingAbility: 'intelligence',
-  spellSaveDC: 13,
-  spellAttackBonus: 5,
+  knownSpells: ['Magic Missile', 'Shield', 'Detect Magic', 'Fireball', 'Counterspell'],
   notes: '',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -83,7 +64,7 @@ test.describe('Character Structure Tests', () => {
 
     expect(character.id).toBeDefined();
     expect(character.name).toBeTruthy();
-    expect(character.class).toBeTruthy();
+    expect(character.classes[0].name).toBeTruthy();
     expect(character.level).toBeGreaterThan(0);
     expect(character.maxHitPoints).toBeGreaterThan(0);
     expect(character.currentHitPoints).toBeGreaterThanOrEqual(0);
@@ -120,7 +101,7 @@ test.describe('Character Structure Tests', () => {
     expect(Array.isArray(character.hitDice)).toBe(true);
 
     character.hitDice.forEach(hd => {
-      expect(['d6', 'd8', 'd10', 'd12']).toContain(hd.type);
+      expect(['d6', 'd8', 'd10', 'd12']).toContain(hd.die);
       expect(hd.total).toBeGreaterThan(0);
       expect(hd.current).toBeGreaterThanOrEqual(0);
       expect(hd.current).toBeLessThanOrEqual(hd.total);
@@ -213,7 +194,7 @@ test.describe('Long Rest Mechanics', () => {
 
   test('should recover hit dice during long rest', () => {
     const hitDice: HitDice[] = [
-      { type: 'd8', total: 5, current: 1 },
+      { die: 'd8', total: 5, current: 1 },
     ];
 
     // Long rest recovers half of total hit dice (rounded down, minimum 1)
@@ -227,7 +208,7 @@ test.describe('Long Rest Mechanics', () => {
 
   test('should recover at least 1 hit die during long rest', () => {
     const hitDice: HitDice[] = [
-      { type: 'd6', total: 2, current: 0 },
+      { die: 'd6', total: 2, current: 0 },
     ];
 
     const recovered = hitDice.map(hd => ({
@@ -247,7 +228,7 @@ test.describe('Long Rest Mechanics', () => {
         { level: 2, total: 3, used: 2 },
       ],
       hitDice: [
-        { type: 'd6', total: 5, current: 1 },
+        { die: 'd6', total: 5, current: 1 },
       ],
     });
 
@@ -341,7 +322,7 @@ test.describe('Spell Slot Tracking', () => {
 
   test('non-spellcasters should not have spell slots', () => {
     const fighter = createMockCharacter({
-      class: 'Fighter',
+      classes: [{ name: 'Fighter', level: 5, hitDie: 'd10' }],
       spellSlots: undefined,
     });
 
@@ -352,7 +333,7 @@ test.describe('Spell Slot Tracking', () => {
 test.describe('Hit Dice Usage', () => {
   test('should spend hit dice during short rest', () => {
     const hitDice: HitDice[] = [
-      { type: 'd8', total: 5, current: 5 },
+      { die: 'd8', total: 5, current: 5 },
     ];
 
     // Spend 1 hit die
@@ -363,7 +344,7 @@ test.describe('Hit Dice Usage', () => {
 
   test('should not spend more hit dice than available', () => {
     const hitDice: HitDice[] = [
-      { type: 'd6', total: 5, current: 0 },
+      { die: 'd6', total: 5, current: 0 },
     ];
 
     const canSpend = hitDice[0].current > 0;
@@ -373,29 +354,29 @@ test.describe('Hit Dice Usage', () => {
 
   test('should match hit die type to class', () => {
     const wizard = createMockCharacter({
-      class: 'Wizard',
-      hitDice: [{ type: 'd6', total: 5, current: 5 }],
+      classes: [{ name: 'Wizard', level: 5, hitDie: 'd6' }],
+      hitDice: [{ die: 'd6', total: 5, current: 5 }],
     });
 
     const fighter = createMockCharacter({
-      class: 'Fighter',
-      hitDice: [{ type: 'd10', total: 5, current: 5 }],
+      classes: [{ name: 'Fighter', level: 5, hitDie: 'd10' }],
+      hitDice: [{ die: 'd10', total: 5, current: 5 }],
     });
 
     const barbarian = createMockCharacter({
-      class: 'Barbarian',
-      hitDice: [{ type: 'd12', total: 5, current: 5 }],
+      classes: [{ name: 'Barbarian', level: 5, hitDie: 'd12' }],
+      hitDice: [{ die: 'd12', total: 5, current: 5 }],
     });
 
-    expect(wizard.hitDice[0].type).toBe('d6');
-    expect(fighter.hitDice[0].type).toBe('d10');
-    expect(barbarian.hitDice[0].type).toBe('d12');
+    expect(wizard.hitDice[0].die).toBe('d6');
+    expect(fighter.hitDice[0].die).toBe('d10');
+    expect(barbarian.hitDice[0].die).toBe('d12');
   });
 
   test('hit dice total should match character level', () => {
     const level5Character = createMockCharacter({
       level: 5,
-      hitDice: [{ type: 'd8', total: 5, current: 5 }],
+      hitDice: [{ die: 'd8', total: 5, current: 5 }],
     });
 
     expect(level5Character.hitDice[0].total).toBe(level5Character.level);

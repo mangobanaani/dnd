@@ -27,8 +27,14 @@ import {
 import { Character } from '@/app/types/character';
 import { QuestBoard } from '@/app/components/campaign/quest-board';
 import { NPCRelationshipGraph } from '@/app/components/campaign/npc-relationship-graph';
-import { safeParseLocalStorage } from '@/app/lib/utils/json-utils';
+import { createClient } from '@/app/lib/supabase/client';
 import { campaignRepository } from '@/app/lib/repositories/campaign.repository';
+import { characterRepository } from '@/app/lib/repositories/character.repository';
+import { sessionRepository } from '@/app/lib/repositories/session.repository';
+import { npcRepository } from '@/app/lib/repositories/npc.repository';
+import { locationRepository } from '@/app/lib/repositories/location.repository';
+import { questRepository } from '@/app/lib/repositories/quest.repository';
+import { noteRepository } from '@/app/lib/repositories/note.repository';
 
 type TabType = 'overview' | 'notes' | 'sessions' | 'npcs' | 'locations' | 'quests' | 'quest-board' | 'npc-graph';
 
@@ -43,6 +49,7 @@ export default function CampaignDetailPage({
   const { addToast } = useToast();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
   // Data for each section
@@ -78,58 +85,64 @@ export default function CampaignDetailPage({
   ];
 
   useEffect(() => {
-    // Load campaign from Supabase
-    campaignRepository
-      .getById(id)
-      .then((found) => {
+    async function loadAll() {
+      // Resolve the authenticated user id (used to stamp createdBy on new notes).
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) setUserId(user.id);
+      } catch {
+        // userId remains null; notes will fall back to 'dm' placeholder.
+      }
+
+      // Load campaign from Supabase
+      try {
+        const found = await campaignRepository.getById(id);
         if (found) {
           setCampaign(found);
-
-          // Load associated characters from localStorage (out of scope for this slice)
-          const charsStored = localStorage.getItem('dnd-characters');
-          if (charsStored) {
-            try {
-              const allCharacters: Character[] = JSON.parse(charsStored);
-              if (found.characterIds.length > 0) {
-                const campaignChars = allCharacters.filter((char) =>
-                  found.characterIds.includes(char.id)
-                );
-                setCharacters(campaignChars);
-              } else {
-                setCharacters([]);
-              }
-            } catch {
-              setCharacters([]);
-            }
+          // Load campaign characters via repository
+          try {
+            const campaignChars = await characterRepository.listForCampaign(id);
+            setCharacters(campaignChars);
+          } catch {
+            setCharacters([]);
           }
         }
-      })
-      .catch(() => {
+      } catch {
         // Failed to load campaign — leave campaign as null (not-found UI shown below)
-      });
+      }
 
-    // Load campaign-specific sub-collections from localStorage (out of scope for this slice)
-    setNotes(safeParseLocalStorage<CampaignNote[]>(`dnd-campaign-notes-${id}`, []));
-    setSessions(safeParseLocalStorage<CampaignSession[]>(`dnd-campaign-sessions-${id}`, []));
-    setNPCs(safeParseLocalStorage<CampaignNPC[]>(`dnd-campaign-npcs-${id}`, []));
-    setLocations(safeParseLocalStorage<CampaignLocation[]>(`dnd-campaign-locations-${id}`, []));
-    setQuests(safeParseLocalStorage<CampaignQuest[]>(`dnd-campaign-quests-${id}`, []));
+      // Load notes from Supabase
+      try {
+        setNotes(await noteRepository.list(id));
+      } catch {
+        setNotes([]);
+      }
+
+      // Load sub-collections from Supabase
+      try {
+        setSessions(await sessionRepository.list(id));
+      } catch {
+        setSessions([]);
+      }
+      try {
+        setNPCs(await npcRepository.list(id));
+      } catch {
+        setNPCs([]);
+      }
+      try {
+        setLocations(await locationRepository.list(id));
+      } catch {
+        setLocations([]);
+      }
+      try {
+        setQuests(await questRepository.list(id));
+      } catch {
+        setQuests([]);
+      }
+    }
+    loadAll();
   }, [id]);
-
-  const loadCampaignData = () => {
-    setNotes(safeParseLocalStorage<CampaignNote[]>(`dnd-campaign-notes-${id}`, []));
-    setSessions(safeParseLocalStorage<CampaignSession[]>(`dnd-campaign-sessions-${id}`, []));
-    setNPCs(safeParseLocalStorage<CampaignNPC[]>(`dnd-campaign-npcs-${id}`, []));
-    setLocations(safeParseLocalStorage<CampaignLocation[]>(`dnd-campaign-locations-${id}`, []));
-    setQuests(safeParseLocalStorage<CampaignQuest[]>(`dnd-campaign-quests-${id}`, []));
-  };
-
-  const saveCampaignData = (
-    type: 'notes' | 'sessions' | 'npcs' | 'locations' | 'quests',
-    data: CampaignNote[] | CampaignSession[] | CampaignNPC[] | CampaignLocation[] | CampaignQuest[]
-  ) => {
-    localStorage.setItem(`dnd-campaign-${type}-${id}`, JSON.stringify(data));
-  };
 
   const deleteCampaign = async () => {
     const confirmed = await confirm({
@@ -143,12 +156,7 @@ export default function CampaignDetailPage({
       try {
         await campaignRepository.remove(id);
 
-        // Clean up campaign sub-collection data still held in localStorage
-        localStorage.removeItem(`dnd-campaign-notes-${id}`);
-        localStorage.removeItem(`dnd-campaign-sessions-${id}`);
-        localStorage.removeItem(`dnd-campaign-npcs-${id}`);
-        localStorage.removeItem(`dnd-campaign-locations-${id}`);
-        localStorage.removeItem(`dnd-campaign-quests-${id}`);
+        // campaign_notes rows are cascade-deleted by the DB; nothing extra needed here.
 
         addToast((campaign?.name || 'Campaign') + ' deleted', 'success');
         router.push('/campaigns');
@@ -214,7 +222,13 @@ export default function CampaignDetailPage({
           : n
       );
       setNotes(updatedNotes);
-      saveCampaignData('notes', updatedNotes);
+      const updatedNote = updatedNotes.find(n => n.id === editingNoteId);
+      if (updatedNote) {
+        noteRepository.update(editingNoteId, updatedNote).catch((err) => {
+          console.error('Failed to update note:', err);
+          addToast('Failed to save note', 'error');
+        });
+      }
     } else {
       // Add new note
       const newNote: CampaignNote = {
@@ -225,14 +239,17 @@ export default function CampaignDetailPage({
         category: noteCategory,
         tags: noteTags.split(',').map(t => t.trim()).filter(t => t),
         isPublic: notePublic,
-        createdBy: 'dm', // TODO: Implement user authentication and use actual user ID
+        createdBy: userId ?? 'dm',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
       const updatedNotes = [newNote, ...notes];
       setNotes(updatedNotes);
-      saveCampaignData('notes', updatedNotes);
+      noteRepository.add(newNote).catch((err) => {
+        console.error('Failed to save note:', err);
+        addToast('Failed to save note', 'error');
+      });
     }
 
     // Reset form
@@ -267,7 +284,13 @@ export default function CampaignDetailPage({
     if (confirmed) {
       const updated = notes.filter((n) => n.id !== noteId);
       setNotes(updated);
-      saveCampaignData('notes', updated);
+      try {
+        await noteRepository.remove(noteId);
+      } catch (err) {
+        console.error('Failed to delete note:', err);
+        addToast('Failed to delete note', 'error');
+        return;
+      }
       addToast('Note deleted', 'success');
     }
   };
@@ -290,7 +313,13 @@ export default function CampaignDetailPage({
           : s
       );
       setSessions(updatedSessions);
-      saveCampaignData('sessions', updatedSessions);
+      const updatedSession = updatedSessions.find(s => s.id === editingSessionId);
+      if (updatedSession) {
+        sessionRepository.update(editingSessionId, updatedSession).catch((err) => {
+          console.error('Failed to update session:', err);
+          addToast('Failed to save session', 'error');
+        });
+      }
     } else {
       // Add new session
       const newSession: CampaignSession = {
@@ -310,7 +339,10 @@ export default function CampaignDetailPage({
 
       const updatedSessions = [newSession, ...sessions];
       setSessions(updatedSessions);
-      saveCampaignData('sessions', updatedSessions);
+      sessionRepository.add(newSession).catch((err) => {
+        console.error('Failed to save session:', err);
+        addToast('Failed to save session', 'error');
+      });
 
       // Update campaign session count in Supabase
       if (campaign) {
@@ -351,7 +383,13 @@ export default function CampaignDetailPage({
     if (confirmed) {
       const updated = sessions.filter((s) => s.id !== sessionId);
       setSessions(updated);
-      saveCampaignData('sessions', updated);
+      try {
+        await sessionRepository.remove(sessionId);
+      } catch (err) {
+        console.error('Failed to delete session:', err);
+        addToast('Failed to delete session', 'error');
+        return;
+      }
       addToast('Session deleted', 'success');
     }
   };
@@ -389,7 +427,13 @@ export default function CampaignDetailPage({
           : n
       );
       setNPCs(updatedNPCs);
-      saveCampaignData('npcs', updatedNPCs);
+      const updatedNPC = updatedNPCs.find(n => n.id === editingNPCId);
+      if (updatedNPC) {
+        npcRepository.update(editingNPCId, updatedNPC).catch((err) => {
+          console.error('Failed to update NPC:', err);
+          addToast('Failed to save NPC', 'error');
+        });
+      }
     } else {
       // Add new NPC
       const newNPC: CampaignNPC = {
@@ -410,7 +454,10 @@ export default function CampaignDetailPage({
 
       const updatedNPCs = [newNPC, ...npcs];
       setNPCs(updatedNPCs);
-      saveCampaignData('npcs', updatedNPCs);
+      npcRepository.add(newNPC).catch((err) => {
+        console.error('Failed to save NPC:', err);
+        addToast('Failed to save NPC', 'error');
+      });
     }
 
     // Reset form
@@ -451,7 +498,13 @@ export default function CampaignDetailPage({
     if (confirmed) {
       const updated = npcs.filter((n) => n.id !== npcId);
       setNPCs(updated);
-      saveCampaignData('npcs', updated);
+      try {
+        await npcRepository.remove(npcId);
+      } catch (err) {
+        console.error('Failed to delete NPC:', err);
+        addToast('Failed to delete NPC', 'error');
+        return;
+      }
       addToast((npc?.name || 'NPC') + ' deleted', 'success');
     }
   };
@@ -483,7 +536,13 @@ export default function CampaignDetailPage({
           : l
       );
       setLocations(updatedLocations);
-      saveCampaignData('locations', updatedLocations);
+      const updatedLocation = updatedLocations.find(l => l.id === editingLocationId);
+      if (updatedLocation) {
+        locationRepository.update(editingLocationId, updatedLocation).catch((err) => {
+          console.error('Failed to update location:', err);
+          addToast('Failed to save location', 'error');
+        });
+      }
     } else {
       // Add new location
       const newLocation: CampaignLocation = {
@@ -503,7 +562,10 @@ export default function CampaignDetailPage({
 
       const updatedLocations = [newLocation, ...locations];
       setLocations(updatedLocations);
-      saveCampaignData('locations', updatedLocations);
+      locationRepository.add(newLocation).catch((err) => {
+        console.error('Failed to save location:', err);
+        addToast('Failed to save location', 'error');
+      });
     }
 
     // Reset form
@@ -538,7 +600,13 @@ export default function CampaignDetailPage({
     if (confirmed) {
       const updated = locations.filter((l) => l.id !== locationId);
       setLocations(updated);
-      saveCampaignData('locations', updated);
+      try {
+        await locationRepository.remove(locationId);
+      } catch (err) {
+        console.error('Failed to delete location:', err);
+        addToast('Failed to delete location', 'error');
+        return;
+      }
       addToast((location?.name || 'Location') + ' deleted', 'success');
     }
   };
@@ -576,7 +644,13 @@ export default function CampaignDetailPage({
           : q
       );
       setQuests(updatedQuests);
-      saveCampaignData('quests', updatedQuests);
+      const updatedQuest = updatedQuests.find(q => q.id === editingQuestId);
+      if (updatedQuest) {
+        questRepository.update(editingQuestId, updatedQuest).catch((err) => {
+          console.error('Failed to update quest:', err);
+          addToast('Failed to save quest', 'error');
+        });
+      }
     } else {
       // Add new quest
       const newQuest: CampaignQuest = {
@@ -597,7 +671,10 @@ export default function CampaignDetailPage({
 
       const updatedQuests = [newQuest, ...quests];
       setQuests(updatedQuests);
-      saveCampaignData('quests', updatedQuests);
+      questRepository.add(newQuest).catch((err) => {
+        console.error('Failed to save quest:', err);
+        addToast('Failed to save quest', 'error');
+      });
     }
 
     // Reset form
@@ -636,7 +713,13 @@ export default function CampaignDetailPage({
     if (confirmed) {
       const updated = quests.filter((q) => q.id !== questId);
       setQuests(updated);
-      saveCampaignData('quests', updated);
+      try {
+        await questRepository.remove(questId);
+      } catch (err) {
+        console.error('Failed to delete quest:', err);
+        addToast('Failed to delete quest', 'error');
+        return;
+      }
       addToast('Quest deleted', 'success');
     }
   };
@@ -646,7 +729,10 @@ export default function CampaignDetailPage({
       q.id === updatedQuest.id ? updatedQuest : q
     );
     setQuests(updatedQuests);
-    saveCampaignData('quests', updatedQuests);
+    questRepository.update(updatedQuest.id, updatedQuest).catch((err) => {
+      console.error('Failed to update quest:', err);
+      addToast('Failed to save quest', 'error');
+    });
   };
 
   // Quest Objectives Management
@@ -663,7 +749,12 @@ export default function CampaignDetailPage({
         : q
     );
     setQuests(updatedQuests);
-    saveCampaignData('quests', updatedQuests);
+    const updatedQuest = updatedQuests.find(q => q.id === questId);
+    if (updatedQuest) {
+      questRepository.update(questId, updatedQuest).catch((err) => {
+        console.error('Failed to update quest:', err);
+      });
+    }
   };
 
   const deleteObjective = (questId: string, objectiveId: string) => {
@@ -677,7 +768,12 @@ export default function CampaignDetailPage({
         : q
     );
     setQuests(updatedQuests);
-    saveCampaignData('quests', updatedQuests);
+    const updatedQuest = updatedQuests.find(q => q.id === questId);
+    if (updatedQuest) {
+      questRepository.update(questId, updatedQuest).catch((err) => {
+        console.error('Failed to update quest:', err);
+      });
+    }
   };
 
   const addObjectiveToQuest = (questId: string, description: string, optional: boolean = false) => {
@@ -700,7 +796,12 @@ export default function CampaignDetailPage({
         : q
     );
     setQuests(updatedQuests);
-    saveCampaignData('quests', updatedQuests);
+    const updatedQuest = updatedQuests.find(q => q.id === questId);
+    if (updatedQuest) {
+      questRepository.update(questId, updatedQuest).catch((err) => {
+        console.error('Failed to update quest:', err);
+      });
+    }
   };
 
   // Edit Campaign State
@@ -754,19 +855,15 @@ export default function CampaignDetailPage({
   const [availableCharacters, setAvailableCharacters] = useState<Character[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState('');
 
-  const openAddCharacterModal = () => {
-    // Load all characters from localStorage
-    const charsStored = localStorage.getItem('dnd-characters');
-    if (charsStored) {
-      try {
-        const allChars: Character[] = JSON.parse(charsStored);
-        // Filter out characters already in this campaign
-        const available = allChars.filter(char => !campaign?.characterIds.includes(char.id));
-        setAvailableCharacters(available);
-      } catch {
-        addToast('Failed to load characters', 'error');
-        return;
-      }
+  const openAddCharacterModal = async () => {
+    try {
+      const allChars = await characterRepository.list();
+      // Filter out characters already in this campaign
+      const available = allChars.filter(char => !campaign?.characterIds.includes(char.id));
+      setAvailableCharacters(available);
+    } catch {
+      addToast('Failed to load characters', 'error');
+      return;
     }
     setShowAddCharacterModal(true);
   };
@@ -774,17 +871,13 @@ export default function CampaignDetailPage({
   const addCharacterToCampaign = async () => {
     if (!campaign || !selectedCharacterId) return;
 
-    const charsStored = localStorage.getItem('dnd-characters');
-    if (!charsStored) return;
-
-    let allCharacters: Character[];
+    let character: Character | null;
     try {
-      allCharacters = JSON.parse(charsStored);
+      character = await characterRepository.getById(selectedCharacterId);
     } catch {
-      addToast('Failed to load characters', 'error');
+      addToast('Failed to load character', 'error');
       return;
     }
-    const character = allCharacters.find(c => c.id === selectedCharacterId);
     if (!character) return;
 
     // Update campaign
@@ -797,7 +890,7 @@ export default function CampaignDetailPage({
       updatedAt: new Date().toISOString(),
     };
 
-    // Update character
+    // Update character with this campaign id
     const updatedCharacter: Character = {
       ...character,
       campaignId: campaign.id,
@@ -813,9 +906,14 @@ export default function CampaignDetailPage({
       return;
     }
 
-    // Save character to localStorage (characters not yet migrated)
-    const updatedCharacters = allCharacters.map(c => c.id === character.id ? updatedCharacter : c);
-    localStorage.setItem('dnd-characters', JSON.stringify(updatedCharacters));
+    // Save character to Supabase
+    try {
+      await characterRepository.update(character.id, updatedCharacter);
+    } catch (err) {
+      console.error('Failed to update character:', err);
+      addToast('Failed to update character', 'error');
+      return;
+    }
 
     // Update local state
     setCampaign(updatedCampaign);
@@ -839,31 +937,29 @@ export default function CampaignDetailPage({
 
     if (!confirmed) return;
 
-    const charsStored = localStorage.getItem('dnd-characters');
-    if (!charsStored) return;
-
-    let allCharacters: Character[];
+    let character: Character | null;
     try {
-      allCharacters = JSON.parse(charsStored);
+      character = await characterRepository.getById(characterId);
     } catch {
-      addToast('Failed to load characters', 'error');
+      addToast('Failed to load character', 'error');
       return;
     }
-    const character = allCharacters.find((c) => c.id === characterId);
     if (!character) return;
+
+    const remainingCharacterIds = campaign.characterIds.filter(cid => cid !== characterId);
 
     // Update campaign
     const updatedCampaign: Campaign = {
       ...campaign,
-      characterIds: campaign.characterIds.filter(id => id !== characterId),
-      // Remove player if they have no other characters in campaign
-      playerIds: campaign.characterIds.filter(id => id !== characterId).some(
-        charId => allCharacters.find(c => c.id === charId)?.playerId === character.playerId
-      ) ? campaign.playerIds : campaign.playerIds.filter(pid => pid !== character.playerId),
+      characterIds: remainingCharacterIds,
+      // Remove the player only if they have no other characters remaining in this campaign
+      playerIds: remainingCharacterIds.some(
+        cid => characters.find(c => c.id === cid)?.playerId === character!.playerId
+      ) ? campaign.playerIds : campaign.playerIds.filter(pid => pid !== character!.playerId),
       updatedAt: new Date().toISOString(),
     };
 
-    // Update character
+    // Unlink character from campaign
     const updatedCharacter: Character = {
       ...character,
       campaignId: undefined,
@@ -879,14 +975,19 @@ export default function CampaignDetailPage({
       return;
     }
 
-    // Save character to localStorage (characters not yet migrated)
-    const updatedCharacters = allCharacters.map(c => c.id === character.id ? updatedCharacter : c);
-    localStorage.setItem('dnd-characters', JSON.stringify(updatedCharacters));
+    // Save character to Supabase
+    try {
+      await characterRepository.update(character.id, updatedCharacter);
+    } catch (err) {
+      console.error('Failed to update character:', err);
+      addToast('Failed to update character', 'error');
+      return;
+    }
 
     // Update local state
     setCampaign(updatedCampaign);
     setCharacters(characters.filter((c) => c.id !== characterId));
-    addToast((character?.name || 'Character') + ' removed from campaign', 'success');
+    addToast((characterToRemove?.name || 'Character') + ' removed from campaign', 'success');
   };
 
   if (!campaign) {

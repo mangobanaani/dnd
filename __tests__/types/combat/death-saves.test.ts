@@ -16,8 +16,8 @@ describe('Death Save Mechanics', () => {
     combatant = {
       ...createDefaultCombatant('Test Character', 'player'),
       id: 'test-1',
-      currentHp: 0,
-      maxHp: 50,
+      currentHitPoints: 0,
+      maxHitPoints: 50,
       ac: 15,
       initiative: 10,
       initiativeModifier: 2,

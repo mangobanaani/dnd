@@ -2,14 +2,23 @@
 
 import { Monster } from '@/app/types/monster';
 import { Button } from '@/app/components/ui/button';
+import { Star } from 'lucide-react';
 
 interface MonsterCardProps {
   monster: Monster;
   onSelect?: (monster: Monster) => void;
   onAddToEncounter?: (monster: Monster) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (monster: Monster) => void;
 }
 
-export function MonsterCard({ monster, onSelect, onAddToEncounter }: MonsterCardProps) {
+export function MonsterCard({
+  monster,
+  onSelect,
+  onAddToEncounter,
+  isFavorite = false,
+  onToggleFavorite,
+}: MonsterCardProps) {
   const getTypeColor = (type: string) => {
     const typeColors: Record<string, string> = {
       'Aberration': 'bg-purple-500/20 text-purple-300',
@@ -73,6 +82,34 @@ export function MonsterCard({ monster, onSelect, onAddToEncounter }: MonsterCard
             )}
           </div>
         </div>
+
+        {/* Favorite toggle */}
+        {onToggleFavorite && (
+          <button
+            aria-label={
+              isFavorite
+                ? `Remove ${monster.name} from favorites`
+                : `Add ${monster.name} to favorites`
+            }
+            aria-pressed={isFavorite}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(monster);
+            }}
+            className={`p-1.5 rounded transition-colors flex-shrink-0 ${
+              isFavorite
+                ? 'text-[#fbbf24] hover:text-[#f59e0b]'
+                : 'text-[#52525b] hover:text-[#fbbf24]'
+            }`}
+          >
+            <Star
+              size={15}
+              fill={isFavorite ? 'currentColor' : 'none'}
+              strokeWidth={2}
+            />
+          </button>
+        )}
+
         <div className="text-right ml-2">
           <div className="text-xs text-[#a1a1aa] mb-1">CR</div>
           <div className={`text-xl font-bold ${getCRColor(monster.cr)}`}>

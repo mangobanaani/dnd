@@ -29,7 +29,7 @@ describe('safeParseJSON', () => {
 
     it('should parse JSON with nested objects', () => {
       const json = '{"user": {"name": "Alice", "age": 30}}';
-      const result = safeParseJSON(json);
+      const result = safeParseJSON<{ user: { name: string; age: number } }>(json);
 
       expect(result.success).toBe(true);
       if (result.success) {
